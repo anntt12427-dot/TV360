@@ -1,0 +1,4989 @@
+﻿﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+>
+
+<title>TV360 WEB PLAYER</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.16.2/shaka-player.compiled.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.8.0/dist/mpegts.min.js"></script>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+
+    margin: 0;
+
+    background: #0d0d0d;
+
+    color: #fff;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* =====================================================
+   TOP
+===================================================== */
+
+.top {
+
+    height: 58px;
+
+    background: #171717;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 8px 14px;
+
+    gap: 8px;
+
+    border-bottom:
+        1px solid #2d2d2d;
+}
+
+
+.tab {
+
+    border: 0;
+
+    padding:
+        11px 20px;
+
+    border-radius: 9px;
+
+    background: #292929;
+
+    color: #ddd;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+.tab:hover {
+
+    background: #353535;
+}
+
+
+.tab.active {
+
+    background: #e50914;
+
+    color: #fff;
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main {
+
+    height:
+        calc(100vh - 58px);
+
+    display: flex;
+}
+
+
+/* =====================================================
+   LEFT
+===================================================== */
+
+.left {
+
+    width: 390px;
+
+    flex-shrink: 0;
+
+    background: #111;
+
+    border-right:
+        1px solid #303030;
+
+    overflow-y: auto;
+
+    padding: 12px;
+}
+
+
+.left::-webkit-scrollbar {
+
+    width: 7px;
+}
+
+
+.left::-webkit-scrollbar-thumb {
+
+    background: #444;
+
+    border-radius: 10px;
+}
+
+
+/* =====================================================
+   FOOTBALL FILTER
+===================================================== */
+
+.football-filters {
+
+    display: flex;
+
+    gap: 7px;
+
+    margin-bottom: 12px;
+}
+
+
+.filter-btn {
+
+    border: 0;
+
+    border-radius: 7px;
+
+    padding:
+        8px 11px;
+
+    background: #282828;
+
+    color: #bbb;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.filter-btn.active {
+
+    background:
+        #e50914;
+
+    color: #fff;
+}
+
+
+/* =====================================================
+   SOURCE GROUPS
+===================================================== */
+
+.groups {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin-bottom: 12px;
+}
+
+
+.group {
+
+    background: #242424;
+
+    border:
+        1px solid #333;
+
+    color: #ccc;
+
+    border-radius: 16px;
+
+    padding:
+        6px 10px;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    transition:
+        background .15s,
+        transform .1s;
+}
+
+
+.group:hover {
+
+    background: #303030;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.group.active {
+
+    background:
+        #e50914;
+
+    color: #fff;
+
+    border-color:
+        #e50914;
+}
+
+
+.source-logo {
+
+    width: 18px;
+
+    height: 18px;
+
+    object-fit: contain;
+
+    border-radius: 4px;
+}
+
+
+/* =====================================================
+   MATCH
+===================================================== */
+
+.match {
+
+    background: #191919;
+
+    border:
+        1px solid #303030;
+
+    border-radius: 10px;
+
+    padding: 13px;
+
+    margin-bottom: 9px;
+
+    cursor: pointer;
+
+    transition:
+        background .15s,
+        border-color .15s,
+        transform .1s;
+}
+
+
+.match:hover {
+
+    background: #222;
+
+    border-color: #555;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.match.selected {
+
+    border-color:
+        #e50914;
+
+    background: #202020;
+}
+
+
+.match-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+}
+
+
+.match-time {
+
+    color: #999;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.live-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: #ff3945;
+
+    font-size: 11px;
+
+    font-weight: bold;
+}
+
+
+.live-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background:
+        #ff2638;
+
+    box-shadow:
+        0 0 7px #ff2638;
+}
+
+
+.match-name {
+
+    font-size: 16px;
+
+    line-height: 1.35;
+
+    font-weight: 700;
+
+    color: #fff;
+
+    margin-bottom: 9px;
+}
+
+
+.match-source {
+
+    color: #888;
+
+    font-size: 11px;
+
+    margin-bottom: 9px;
+}
+
+
+.match-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    color: #888;
+
+    font-size: 11px;
+}
+
+
+.match-blv-count {
+
+    color: #aaa;
+}
+
+
+.watch-text {
+
+    color:
+        #e50914;
+
+    font-weight: bold;
+}
+
+/* =====================================================
+   BÓNG ĐÁ VN: CARD TRẬN
+===================================================== */
+
+.vn-match-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    margin-bottom: 9px;
+
+    background: #191919;
+
+    border: 1px solid #303030;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition:
+        background .15s,
+        border-color .15s,
+        transform .1s;
+}
+
+.vn-match-card:hover {
+
+    background: #222;
+
+    border-color: #555;
+
+    transform:
+        translateY(-1px);
+}
+
+.vn-match-logo {
+
+    width: 46px;
+
+    height: 46px;
+
+    object-fit: contain;
+
+    background: #222;
+
+    border-radius: 8px;
+
+    flex-shrink: 0;
+}
+
+.vn-match-body {
+
+    min-width: 0;
+
+    flex: 1;
+}
+
+.vn-match-head {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 5px;
+}
+
+.vn-match-time {
+
+    color: #999;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.vn-match-title {
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: #fff;
+
+    line-height: 1.35;
+}
+
+.vn-match-foot {
+
+    margin-top: 6px;
+
+    color: #888;
+
+    font-size: 11px;
+}
+
+/* =====================================================
+   TV
+===================================================== */
+
+.channel {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 9px;
+
+    margin-bottom: 5px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    background: #191919;
+
+    border:
+        1px solid #292929;
+}
+
+
+.channel:hover {
+
+    background: #252525;
+}
+
+
+.logo {
+
+    width: 38px;
+
+    height: 38px;
+
+    object-fit: contain;
+
+    background: #222;
+
+    border-radius: 6px;
+}
+
+
+.channel-name {
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   RIGHT
+===================================================== */
+
+.right {
+
+    flex: 1;
+
+    min-width: 0;
+
+    background: #000;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow-y: auto;
+}
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+.player-box {
+
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    max-height: 72vh;
+
+    background: #000;
+
+    position: relative;
+
+    flex-shrink: 0;
+}
+
+
+video {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    background: #000;
+}
+
+.player-actions {
+
+    position: absolute;
+
+    right: 0;
+
+    bottom: 0;
+
+    left: 0;
+
+    z-index: 2;
+
+    padding: 34px 12px 10px;
+
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, .9),
+        rgba(0, 0, 0, 0)
+    );
+
+    opacity: 1;
+
+    transition: opacity .22s ease;
+}
+
+.player-box.controls-hidden .player-actions {
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+.progress-track {
+
+    width: 100%;
+
+    height: 4px;
+
+    accent-color: #e50914;
+
+    cursor: pointer;
+}
+
+.control-row {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 5px;
+}
+
+.player-action,
+.speed-select,
+.quality-select,
+.volume-range {
+
+    height: 30px;
+
+    border: 0;
+
+    border-radius: 6px;
+
+    background: rgba(20, 20, 20, .72);
+
+    color: #ddd;
+
+    padding: 0 9px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+}
+
+.player-action:hover,
+.speed-select:hover {
+
+    background: rgba(70, 70, 70, .9);
+}
+
+.quality-select {
+
+    max-width: 82px;
+}
+
+.icon-button {
+
+    width: 32px;
+
+    padding: 0;
+
+    font-size: 16px;
+}
+
+.time-label {
+
+    min-width: 82px;
+
+    color: #eee;
+
+    font-size: 11px;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.control-spacer {
+
+    flex: 1;
+}
+
+.volume-range {
+
+    width: 72px;
+
+    accent-color: #fff;
+
+    cursor: pointer;
+}
+
+.player-action.live {
+
+    color: #ff5360;
+
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   INFO
+===================================================== */
+
+.info {
+
+    padding:
+        15px 20px;
+
+    border-top:
+        1px solid #242424;
+
+    background:
+        #0d0d0d;
+}
+
+
+.title {
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    margin-bottom: 5px;
+}
+
+
+.status {
+
+    color: #999;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   SOURCE INFO
+===================================================== */
+
+.current-source {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 8px;
+
+    padding:
+        5px 9px;
+
+    border-radius: 15px;
+
+    background: #202020;
+
+    color: #bbb;
+
+    font-size: 11px;
+}
+
+
+.current-source img {
+
+    width: 17px;
+
+    height: 17px;
+
+    object-fit: contain;
+
+    border-radius: 4px;
+}
+
+
+/* =====================================================
+   BLV
+===================================================== */
+
+.blv-panel {
+
+    margin-top: 15px;
+
+    padding-top: 13px;
+
+    border-top:
+        1px solid #292929;
+}
+
+
+.blv-label {
+
+    font-size: 12px;
+
+    color: #888;
+
+    margin-bottom: 8px;
+}
+
+
+.blv-buttons {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+
+.blv-button {
+
+    border:
+        1px solid #3a3a3a;
+
+    background: #222;
+
+    color: #ddd;
+
+    padding:
+        8px 12px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+}
+
+
+.blv-button:hover {
+
+    background: #333;
+
+    border-color: #555;
+}
+
+
+.blv-button.active {
+
+    background:
+        #e50914;
+
+    border-color:
+        #e50914;
+
+    color: #fff;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.error {
+
+    color:
+        #ff4545;
+
+    white-space: pre-wrap;
+
+    font-family:
+        monospace;
+
+    font-size: 12px;
+
+    margin-top: 10px;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty {
+
+    padding:
+        30px 10px;
+
+    text-align: center;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:800px) {
+
+    body {
+        overflow: auto;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .top {
+        height: auto;
+        min-height: 56px;
+        padding: 8px 10px;
+        gap: 6px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .tab {
+        flex: 1;
+        padding: 12px 8px;
+        font-size: 13px;
+        border-radius: 8px;
+        min-height: 44px;
+    }
+
+    .main {
+        height: auto;
+        min-height: calc(100vh - 56px);
+        flex-direction: column;
+    }
+
+    .right {
+        order: 1;
+        overflow: visible;
+    }
+
+    .player-box {
+        max-height: none;
+        aspect-ratio: 16 / 9;
+        position: sticky;
+        top: 56px;
+        z-index: 9;
+        background: #000;
+    }
+
+    .player-actions {
+        padding: 20px 8px 8px;
+    }
+
+    .control-row {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .player-action,
+    .speed-select,
+    .quality-select {
+        height: 40px;
+        min-width: 44px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .icon-button {
+        width: 44px;
+        height: 40px;
+    }
+
+    .quality-select {
+        max-width: none;
+        flex: 1;
+        min-width: 110px;
+    }
+
+    .progress-track {
+        height: 8px;
+    }
+
+    .left {
+        order: 2;
+        width: 100%;
+        max-height: none;
+        border-right: 0;
+        border-top: 1px solid #303030;
+        padding: 10px;
+    }
+
+    .groups {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .group {
+        flex-shrink: 0;
+        padding: 10px 14px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+
+    .match, .channel {
+        padding: 14px 12px;
+        min-height: 56px;
+    }
+
+    .match-name {
+        font-size: 14px;
+    }
+
+    .blv-buttons {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .blv-button {
+        flex-shrink: 0;
+        padding: 12px 16px;
+        min-height: 44px;
+        font-size: 13px;
+    }
+
+    .info {
+        padding: 12px 14px;
+    }
+
+    .title {
+        font-size: 17px;
+        line-height: 1.4;
+    }
+
+    .time-label {
+        min-width: 70px;
+        font-size: 10px;
+    }
+
+    .volume-range {
+        display: none;
+    }
+
+    .speed-select {
+        padding: 0 5px;
+        font-size: 12px;
+    }
+
+}
+
+@media(max-width:400px) {
+    .time-label { display: none; }
+    #rewindButton, #forwardButton { display: none; }
+    .control-spacer { display: none; }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===================================================
+     TOP
+=================================================== -->
+
+<div class="top">
+
+    <button
+        id="footballTab"
+        class="tab active"
+        onclick="switchMode('football')"
+    >
+        ⚽ THỂ THAO QUỐC TẾ
+    </button>
+
+
+    <button
+        id="vnFootballTab"
+        class="tab"
+        onclick="switchMode('vnfootball')"
+    >
+        🇻🇳 BÓNG ĐÁ VN
+    </button>
+
+    <button
+        id="tvTab"
+        class="tab"
+        onclick="switchMode('tv')"
+    >
+        📺 TV
+    </button>
+
+</div>
+
+
+<!-- ===================================================
+     MAIN
+=================================================== -->
+
+<div class="main">
+
+
+    <!-- LEFT -->
+
+    <div class="left">
+
+        <div
+            id="footballFilters"
+            class="football-filters"
+        >
+
+            <button
+                id="liveFilter"
+                class="filter-btn active"
+            >
+                🔴 ĐANG ĐÁ
+            </button>
+
+        </div>
+
+
+        <!-- SOURCE -->
+
+        <div
+            id="groups"
+            class="groups"
+        ></div>
+
+
+        <!-- MATCH / TV LIST -->
+
+        <div
+            id="list"
+        ></div>
+
+    </div>
+
+
+    <!-- RIGHT -->
+
+    <div class="right">
+
+        <div class="player-box">
+
+            <video
+                id="video"
+                autoplay
+                playsinline
+            ></video>
+
+            <div class="player-actions">
+
+                <input
+                    id="progressTrack"
+                    class="progress-track"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="0"
+                    step="0.1"
+                    aria-label="Tiến trình phát"
+                >
+
+                <div class="control-row">
+
+                    <button
+                        id="playButton"
+                        class="player-action icon-button"
+                        type="button"
+                        title="Phát hoặc tạm dừng"
+                    >
+                        ▶
+                    </button>
+
+                <button
+                    id="rewindButton"
+                    class="player-action icon-button"
+                    type="button"
+                    title="Tua lui 10 giây"
+                >
+                    ↶
+                </button>
+
+                <button
+                    id="forwardButton"
+                    class="player-action icon-button"
+                    type="button"
+                    title="Tua tới 10 giây"
+                >
+                    ↷
+                </button>
+
+                <span
+                    id="timeLabel"
+                    class="time-label"
+                >
+                    00:00 / LIVE
+                </span>
+
+                <div class="control-spacer"></div>
+
+                <button
+                    id="muteButton"
+                    class="player-action icon-button"
+                    type="button"
+                    title="Tắt tiếng"
+                >
+                    🔊
+                </button>
+
+                <input
+                    id="volumeRange"
+                    class="volume-range"
+                    type="range"
+                    min="0"
+                    max="1"
+                    value="1"
+                    step="0.05"
+                    aria-label="Âm lượng"
+                >
+
+                <button
+                    id="liveButton"
+                    class="player-action live"
+                    type="button"
+                    title="Về vị trí trực tiếp"
+                >
+                    LIVE
+                </button>
+
+                <select
+                    id="speedSelect"
+                    class="speed-select"
+                    title="Tốc độ phát"
+                >
+                    <option value="1">1x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                </select>
+
+                <select
+                    id="qualitySelect"
+                    class="quality-select"
+                    title="Chất lượng video"
+                    disabled
+                >
+                    <option value="auto">Auto</option>
+                </select>
+
+                <button
+                    id="fullscreenButton"
+                    class="player-action icon-button"
+                    type="button"
+                    title="Toàn màn hình"
+                >
+                    ⛶
+                </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="info">
+
+            <div
+                id="title"
+                class="title"
+            >
+                Chưa chọn trận
+            </div>
+
+
+            <div
+                id="status"
+                class="status"
+            >
+                Chọn nguồn và bấm vào một trận để phát
+            </div>
+
+
+            <div
+                id="currentSource"
+                class="current-source"
+                style="display:none"
+            ></div>
+
+
+            <div
+                id="blvPanel"
+                class="blv-panel"
+                style="display:none"
+            >
+
+                <div class="blv-label">
+                    📺 KÊNH THỂ THAO
+                </div>
+
+
+                <div
+                    id="blvButtons"
+                    class="blv-buttons"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="error"
+                class="error"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let mode = "football";
+
+let allData = [];
+
+let currentSource = "Tất cả";
+
+let currentMatch = null;
+
+let currentChannel = null;
+
+// Tab Bong da VN: website dang chon (null = dang o man chon website)
+let currentVnSite = null;
+
+// Tab Bong da VN: danh sach website + tran (tu API)
+let vnSites = [];
+
+// Tran dang phat trong tab Bong da VN (de chon doi luong)
+let currentVnMatch = null;
+
+let shakaPlayer = null;
+
+let currentDashUrl = "";
+
+let dashRecoveryAttempts = 0;
+
+let hlsPlayer = null;
+
+let mpegtsPlayer = null;
+
+let footballRefreshTimer = null;
+
+const streamCache = new Map();
+
+const STREAM_CACHE_TIME = 2 * 60 * 1000;
+
+
+// =====================================================
+// DOM
+// =====================================================
+
+const video =
+    document.getElementById(
+        "video"
+    );
+
+
+const list =
+    document.getElementById(
+        "list"
+    );
+
+
+const groups =
+    document.getElementById(
+        "groups"
+    );
+
+
+const title =
+    document.getElementById(
+        "title"
+    );
+
+
+const status =
+    document.getElementById(
+        "status"
+    );
+
+
+const errorBox =
+    document.getElementById(
+        "error"
+    );
+
+
+const blvPanel =
+    document.getElementById(
+        "blvPanel"
+    );
+
+
+const blvButtons =
+    document.getElementById(
+        "blvButtons"
+    );
+
+
+const footballFilters =
+    document.getElementById(
+        "footballFilters"
+    );
+
+
+const currentSourceBox =
+    document.getElementById(
+        "currentSource"
+    );
+
+
+const rewindButton =
+    document.getElementById(
+        "rewindButton"
+    );
+
+
+const forwardButton =
+    document.getElementById(
+        "forwardButton"
+    );
+
+
+const liveButton =
+    document.getElementById(
+        "liveButton"
+    );
+
+
+const speedSelect =
+    document.getElementById(
+        "speedSelect"
+    );
+
+
+const progressTrack =
+    document.getElementById(
+        "progressTrack"
+    );
+
+
+const playButton =
+    document.getElementById(
+        "playButton"
+    );
+
+
+const muteButton =
+    document.getElementById(
+        "muteButton"
+    );
+
+
+const volumeRange =
+    document.getElementById(
+        "volumeRange"
+    );
+
+
+const fullscreenButton =
+    document.getElementById(
+        "fullscreenButton"
+    );
+
+
+const qualitySelect =
+    document.getElementById(
+        "qualitySelect"
+    );
+
+
+const timeLabel =
+    document.getElementById(
+        "timeLabel"
+    );
+
+
+const playerBox =
+    document.querySelector(
+        ".player-box"
+    );
+
+
+let controlsHideTimer = null;
+
+let progressDragging = false;
+
+
+function showPlayerControls() {
+    playerBox.classList.remove(
+        "controls-hidden"
+    );
+
+    clearTimeout(controlsHideTimer);
+
+    if (!video.paused && !progressDragging) {
+        controlsHideTimer = setTimeout(
+            () => playerBox.classList.add("controls-hidden"),
+            3500
+        );
+    }
+}
+
+
+function hidePlayerControlsSoon() {
+    clearTimeout(controlsHideTimer);
+
+    if (!video.paused && !progressDragging) {
+        controlsHideTimer = setTimeout(
+            () => playerBox.classList.add("controls-hidden"),
+            3500
+        );
+    }
+}
+
+
+playerBox.addEventListener(
+    "mousemove",
+    showPlayerControls
+);
+
+
+playerBox.addEventListener(
+    "touchstart",
+    showPlayerControls,
+    { passive: true }
+);
+
+
+playerBox.addEventListener(
+    "mouseleave",
+    hidePlayerControlsSoon
+);
+
+
+playerBox.querySelector(
+    ".player-actions"
+).addEventListener(
+    "mouseenter",
+    () => clearTimeout(controlsHideTimer)
+);
+
+
+playerBox.querySelector(
+    ".player-actions"
+).addEventListener(
+    "mouseleave",
+    hidePlayerControlsSoon
+);
+
+
+function formatTime(seconds) {
+    if (!Number.isFinite(seconds)) {
+        return "00:00";
+    }
+
+    const total = Math.max(0, Math.floor(seconds));
+    const minutes = Math.floor(total / 60);
+    const remainder = total % 60;
+
+    return String(minutes).padStart(2, "0") +
+        ":" +
+        String(remainder).padStart(2, "0");
+}
+
+
+// Moc thoi gian 0 cho live DASH: currentTime co the la gia tri tuyet doi
+// rat lon (tinh tu 1970). Lay diem bat dau cua cua so seekable/buffered
+// lam goc de hien thi thoi gian tuong doi.
+function getTimeOrigin() {
+    try {
+        if (video.seekable && video.seekable.length) {
+            return video.seekable.start(0);
+        }
+
+        if (video.buffered && video.buffered.length) {
+            return video.buffered.start(0);
+        }
+    } catch {}
+
+    return 0;
+}
+
+function updateVideoControls() {
+    const duration = video.duration;
+    const current = video.currentTime;
+
+    if (Number.isFinite(duration) && duration > 0) {
+        progressTrack.value =
+            String((current / duration) * 100);
+
+        timeLabel.textContent =
+            formatTime(current) +
+            " / " +
+            formatTime(duration);
+    } else {
+        // Live: hien thi thoi gian tuong doi tu goc thay vi timestamp tuyet doi.
+        const origin = getTimeOrigin();
+        const relCurrent = current - origin;
+
+        timeLabel.textContent =
+            formatTime(relCurrent > 0 ? relCurrent : 0) + " / LIVE";
+    }
+
+    playButton.textContent = video.paused ? "▶" : "❚❚";
+    muteButton.textContent = video.muted ? "🔇" : "🔊";
+}
+
+
+function resetQualityOptions() {
+    qualitySelect.innerHTML =
+        '<option value="auto">Auto</option>';
+    qualitySelect.value = "auto";
+    qualitySelect.disabled = true;
+}
+
+
+function addQualityOption(value, label) {
+    if (
+        [...qualitySelect.options]
+            .some(option => option.value === String(value))
+    ) {
+        return;
+    }
+
+    const option = document.createElement("option");
+    option.value = String(value);
+    option.textContent = label;
+    qualitySelect.appendChild(option);
+    qualitySelect.disabled = false;
+}
+
+
+function populateHlsQualities() {
+    resetQualityOptions();
+
+    if (!hlsPlayer || !hlsPlayer.levels.length) {
+        return;
+    }
+
+    try { hlsPlayer.config.capLevelToPlayerSize = false; } catch {}
+    try { hlsPlayer.autoLevelCapping = -1; } catch {}
+
+    const levels = hlsPlayer.levels
+        .map((level, index) => ({
+            index,
+            height: level.height || 0,
+            bitrate: level.bitrate || 0
+        }))
+        .sort((a, b) =>
+            b.height - a.height ||
+            b.bitrate - a.bitrate
+        );
+
+    levels.forEach(level => {
+            const label = level.height
+                ? level.height + "p • " +
+                    (level.bitrate / 1000000).toFixed(1) +
+                    " Mbps"
+                : Math.round(level.bitrate / 1000) + "k";
+
+            addQualityOption("hls:" + level.index, label);
+        });
+
+    if (levels.length > 1) {
+        addQualityOption("best", "Nét nhất");
+    }
+
+    syncHlsQualitySelection();
+}
+
+
+function syncHlsQualitySelection() {
+    if (!hlsPlayer) {
+        return;
+    }
+
+    const cur = hlsPlayer.currentLevel;
+    if (cur === -1 || cur === undefined || cur === null) {
+        qualitySelect.value = "auto";
+        return;
+    }
+    const manual = "hls:" + cur;
+    if ([...qualitySelect.options].some(o => o.value === manual)) {
+        qualitySelect.value = manual;
+    }
+}
+
+
+function populateShakaQualities() {
+    resetQualityOptions();
+
+    if (!shakaPlayer) {
+        return;
+    }
+
+    const variantTracks = shakaPlayer
+        .getVariantTracks()
+        .filter(track => track.height);
+
+    const tracks = [...variantTracks]
+        .sort((a, b) =>
+            b.height - a.height ||
+            b.bandwidth - a.bandwidth
+        );
+
+    tracks.forEach(track => {
+            const label = track.height + "p • " +
+                (track.bandwidth / 1000000).toFixed(1) +
+                " Mbps" + (track.audioBandwidth ? " • 🔊" : "");
+            addQualityOption("shaka-id:" + track.id, label);
+        });
+
+    if (tracks.length > 1) {
+        addQualityOption("best", "Nét nhất");
+    }
+    if (tracks.length <= 1) {
+        status.textContent += " • 1 mức chất lượng";
+    }
+}
+
+
+function findBestShakaTrack() {
+    if (!shakaPlayer) {
+        return null;
+    }
+
+    return shakaPlayer
+        .getVariantTracks()
+        .filter(track => track.height)
+        .sort((a, b) =>
+            b.height - a.height ||
+            b.bandwidth - a.bandwidth
+        )[0] || null;
+}
+
+
+function selectShakaTrack(track) {
+    if (!shakaPlayer || !track) {
+        return;
+    }
+
+    shakaPlayer.configure({
+        abr: {
+            enabled: false
+        }
+    });
+
+    shakaPlayer.selectVariantTrack(
+        track,
+        true
+    );
+}
+
+
+progressTrack.oninput =
+    () => {
+        progressDragging = true;
+        showPlayerControls();
+
+        if (Number.isFinite(video.duration)) {
+            video.currentTime =
+                video.duration *
+                Number(progressTrack.value) /
+                100;
+        }
+    };
+
+
+progressTrack.addEventListener(
+    "change",
+    () => {
+        progressDragging = false;
+        hidePlayerControlsSoon();
+    }
+);
+
+
+playButton.onclick =
+    async () => {
+        if (video.paused) {
+            await video.play();
+        } else {
+            video.pause();
+        }
+
+        showPlayerControls();
+    };
+
+
+muteButton.onclick =
+    () => {
+        video.muted = !video.muted;
+        updateVideoControls();
+    };
+
+
+volumeRange.oninput =
+    () => {
+        video.volume = Number(volumeRange.value);
+        video.muted = video.volume === 0;
+        updateVideoControls();
+    };
+
+
+fullscreenButton.onclick =
+    async () => {
+        const playerBox = document.querySelector(".player-box");
+
+        if (!document.fullscreenElement) {
+            await playerBox.requestFullscreen?.();
+        } else {
+            await document.exitFullscreen?.();
+        }
+    };
+
+
+qualitySelect.onchange =
+    () => {
+        const value = qualitySelect.value;
+
+        if (value === "auto") {
+            if (hlsPlayer) {
+                hlsPlayer.currentLevel = -1;
+            }
+
+            if (shakaPlayer) {
+                shakaPlayer.configure({
+                    abr: {
+                        enabled: true
+                    }
+                });
+            }
+
+            return;
+        }
+
+        if (value === "best") {
+            if (hlsPlayer) {
+                const best = hlsPlayer.levels
+                    .map((level, index) => ({
+                        index,
+                        height: level.height || 0,
+                        bitrate: level.bitrate || 0
+                    }))
+                    .sort((a, b) =>
+                        b.height - a.height ||
+                        b.bitrate - a.bitrate
+                    )[0];
+
+                if (best) {
+                    try { hlsPlayer.autoLevelCapping = -1; } catch {}
+                    hlsPlayer.nextLevel = best.index;
+                    hlsPlayer.currentLevel = best.index;
+                    try { hlsPlayer.loadLevel = best.index; } catch {}
+                    qualitySelect.value = "best";
+                    status.textContent = "🔴 Đang phát • khóa " + (best.height ? best.height + "p" : "nét nhất");
+                }
+            }
+
+            if (shakaPlayer) {
+                const bestTrack = findBestShakaTrack();
+                selectShakaTrack(bestTrack);
+                if (bestTrack) {
+                    qualitySelect.value = "best";
+                    status.textContent = "🔴 Đang phát • khóa " + bestTrack.height + "p";
+                }
+            }
+
+            return;
+        }
+
+        if (
+            value.startsWith("shaka-id:") &&
+            shakaPlayer
+        ) {
+            const id = Number(value.slice("shaka-id:".length));
+            const track = shakaPlayer
+                .getVariantTracks()
+                .find(item => item.id === id);
+
+            if (track) {
+                selectShakaTrack(track);
+                qualitySelect.value = value;
+                status.textContent = "🔴 Đang phát • khóa " + track.height + "p";
+            }
+
+            return;
+        }
+
+        if (value.startsWith("hls:") && hlsPlayer) {
+            const levelIndex = Number(value.slice("hls:".length));
+            if (
+                Number.isInteger(levelIndex) &&
+                hlsPlayer.levels[levelIndex]
+            ) {
+                try { hlsPlayer.autoLevelCapping = -1; } catch {}
+                hlsPlayer.nextLevel = levelIndex;
+                hlsPlayer.currentLevel = levelIndex;
+                try { hlsPlayer.loadLevel = levelIndex; } catch {}
+                qualitySelect.value = value;
+                const lv = hlsPlayer.levels[levelIndex];
+                status.textContent = "🔴 Đang phát • khóa " + (lv.height ? lv.height + "p" : (lv.bitrate/1000) + "k");
+            }
+            return;
+        }
+    };
+
+
+video.addEventListener(
+    "loadeddata",
+    () => {
+        if (hlsPlayer) {
+            syncHlsQualitySelection();
+        }
+    }
+);
+
+
+[
+    "timeupdate",
+    "durationchange",
+    "loadedmetadata",
+    "play",
+    "pause",
+    "volumechange"
+].forEach(eventName => {
+    video.addEventListener(eventName, updateVideoControls);
+});
+
+
+video.addEventListener(
+    "play",
+    showPlayerControls
+);
+
+
+video.addEventListener(
+    "pause",
+    showPlayerControls
+);
+
+
+function seekVideo(seconds) {
+    if (!Number.isFinite(video.duration)) {
+        return;
+    }
+
+    video.currentTime = Math.max(
+        0,
+        Math.min(
+            video.duration,
+            video.currentTime + seconds
+        )
+    );
+}
+
+
+function seekLive() {
+    if (video.seekable.length) {
+        video.currentTime =
+            video.seekable.end(
+                video.seekable.length - 1
+            );
+    } else if (Number.isFinite(video.duration)) {
+        video.currentTime = video.duration;
+    }
+}
+
+
+rewindButton.onclick =
+    () => seekVideo(-10);
+
+
+forwardButton.onclick =
+    () => seekVideo(10);
+
+
+liveButton.onclick =
+    seekLive;
+
+
+speedSelect.onchange =
+    () => {
+        video.playbackRate =
+            Number(speedSelect.value);
+    };
+
+
+// =====================================================
+// SHAKA
+// =====================================================
+
+async function initPlayer() {
+
+    shaka.polyfill.installAll();
+
+    if (!shaka.Player.isBrowserSupported()) {
+        throw new Error(
+            "Trình duyệt không hỗ trợ Shaka Player"
+        );
+    }
+
+    // Nếu còn player cũ thì hủy hoàn toàn
+    if (shakaPlayer) {
+        try {
+            await shakaPlayer.destroy();
+        } catch (e) {
+            console.warn("Destroy old Shaka:", e);
+        }
+
+        shakaPlayer = null;
+    }
+
+    // Tạo Shaka mới trực tiếp trên video
+    shakaPlayer = new shaka.Player(video);
+
+    shakaPlayer.configure({
+        manifest: {
+            disableAudio: false,
+            retryParameters: {
+                maxAttempts: 4,
+                baseDelay: 300,
+                backoffFactor: 1.5
+            }
+        },
+        streaming: {
+            retryParameters: {
+                maxAttempts: 5,
+                baseDelay: 250,
+                backoffFactor: 1.5
+            },
+            lowLatencyMode: false,
+            bufferingGoal: 30,
+            rebufferingGoal: 8,
+            bufferBehind: 60,
+            // Cho Shaka tu phuc hoi MSE khi gap loi decode segment
+            // (nhieu kenh DASH live tra segment loi thoang qua).
+            allowMediaSourceRecoveries: true,
+            minBytesForRecovery: 3000
+        }
+    });
+
+    shakaPlayer.addEventListener(
+        "error",
+        e => {
+
+            console.error(
+                "SHAKA ERROR:",
+                e.detail
+            );
+
+            const detail = e.detail || {};
+
+            // 3014: stream loi -> thu khoi phuc lai toan bo.
+            if (
+                detail.code === 3014 &&
+                currentDashUrl &&
+                dashRecoveryAttempts < 1
+            ) {
+                dashRecoveryAttempts++;
+                status.textContent =
+                    "Đang khôi phục luồng...";
+                recoverDashPlayback();
+                return;
+            }
+
+            // 3016: loi decode (thuong do audio track cua kenh loi).
+            // Thu tat audio de video van phat duoc.
+            if (
+                detail.code === 3016 &&
+                shakaPlayer &&
+                !shakaPlayer.__audioDisabled
+            ) {
+                shakaPlayer.__audioDisabled = true;
+                try {
+                    shakaPlayer.configure({
+                        manifest: { disableAudio: true }
+                    });
+                } catch {}
+                status.textContent =
+                    "Đang phát (không tiếng)...";
+                errorBox.textContent = "";
+                return;
+            }
+
+            errorBox.textContent =
+                "Shaka Error:\n" +
+                JSON.stringify(
+                    detail,
+                    null,
+                    2
+                );
+        }
+    );
+
+    return shakaPlayer;
+}
+
+
+async function recoverDashPlayback() {
+    if (!shakaPlayer || !currentDashUrl) {
+        return;
+    }
+
+    try {
+        await shakaPlayer.unload();
+
+        await shakaPlayer.load(currentDashUrl);
+        populateShakaQualities();
+        status.textContent = "🔴 Đang phát";
+    } catch (error) {
+        console.error("DASH RECOVERY ERROR:", error);
+        errorBox.textContent =
+            "Không thể khôi phục DASH: " +
+            error.message;
+    }
+}
+
+// =====================================================
+// SWITCH MODE
+// =====================================================
+
+async function switchMode(
+    newMode
+) {
+
+    mode =
+        newMode;
+
+
+    currentSource =
+        "Tất cả";
+
+
+    currentMatch =
+        null;
+
+
+    currentChannel =
+        null;
+
+
+    currentDashUrl =
+        "";
+
+
+    dashRecoveryAttempts =
+        0;
+
+    currentVnSite =
+        null;
+
+    currentVnMatch =
+        null;
+
+    document
+        .getElementById(
+            "footballTab"
+        )
+        .classList.toggle(
+            "active",
+            mode === "football"
+        );
+
+    document
+        .getElementById(
+            "vnFootballTab"
+        )
+        .classList.toggle(
+            "active",
+            mode === "vnfootball"
+        );
+
+    document
+        .getElementById(
+            "tvTab"
+        )
+        .classList.toggle(
+            "active",
+            mode === "tv"
+        );
+
+
+    await stopPlayer();
+
+
+    hideBlv();
+
+
+    await loadData();
+
+
+    if (
+        footballRefreshTimer
+    ) {
+
+        clearInterval(
+            footballRefreshTimer
+        );
+
+        footballRefreshTimer =
+            null;
+    }
+
+
+    if (
+        mode === "football"
+    ) {
+
+        footballRefreshTimer =
+            setInterval(
+                async () => {
+
+                    try {
+
+                        await loadData();
+
+                    } catch (e) {
+
+                        console.error(e);
+                    }
+
+                },
+                1200000
+            );
+    }
+}
+
+
+// =====================================================
+// LOAD DATA
+// =====================================================
+
+async function loadData() {
+
+    list.innerHTML =
+        `
+        <div class="empty">
+            Đang tải playlist...
+        </div>
+        `;
+
+
+    groups.innerHTML =
+        "";
+
+
+    try {
+
+        // Nguon chap chon -> thu lai vai lan thay vi bao loi ngay.
+        let data = null;
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                const response =
+                    await fetch(
+                        "/api/channels?type=" +
+                        encodeURIComponent(
+                            mode
+                        ) +
+                        "&t=" +
+                        Date.now()
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "HTTP " + response.status
+                    );
+                }
+
+                const json = await response.json();
+
+                if (!json.ok) {
+                    throw new Error(
+                        json.error ||
+                        "Không tải được playlist"
+                    );
+                }
+
+                data = json;
+                lastError = null;
+                break;
+
+            } catch (e) {
+                lastError = e;
+
+                if (attempt < 3) {
+                    list.innerHTML =
+                        `<div class="empty">Đang thử lại (${attempt}/3)...</div>`;
+
+                    await new Promise(r =>
+                        setTimeout(r, 1200 * attempt)
+                    );
+                }
+            }
+        }
+
+        if (lastError || !data) {
+            throw lastError || new Error("Không tải được playlist");
+        }
+
+
+        if (
+            mode === "football"
+        ) {
+
+            allData =
+                data.groups ||
+                [];
+
+            renderFootball();
+
+        } else if (
+            mode === "vnfootball"
+        ) {
+
+            vnSites =
+                data.sites ||
+                [];
+
+            footballFilters.style.display =
+                "none";
+
+            renderVnFootball();
+
+        } else {
+
+            allData =
+                data.channels ||
+                [];
+
+            footballFilters.style.display =
+                "none";
+
+            renderTV();
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+
+        list.innerHTML =
+            `
+            <div
+                class="empty"
+                style="color:#f44"
+            >
+                Lỗi tải playlist
+                <br><br>
+                ${escapeHtml(
+                    err.message
+                )}
+            </div>
+            `;
+    }
+}
+
+
+// =====================================================
+// FOOTBALL
+// =====================================================
+
+function renderFootball() {
+
+    footballFilters.style.display =
+        "flex";
+
+    // ==================================================
+    // LỌC TRẬN THEO SOURCE
+    // ==================================================
+
+    const filtered =
+        allData.filter(
+            match => {
+
+                const name =
+                    String(
+                        match.name ||
+                        ""
+                    )
+                        .toLowerCase();
+
+
+                const channels =
+                    match.channels ||
+                    [];
+
+
+                const sourceOK =
+                    currentSource ===
+                    "Tất cả" ||
+
+                    channels.some(
+                        ch =>
+                            String(
+                                ch.source ||
+                                ""
+                            ).trim() ===
+                            currentSource
+                    );
+
+
+                return sourceOK;
+            }
+        );
+
+
+    renderFootballGroups();
+
+
+    if (
+        !filtered.length
+    ) {
+
+        list.innerHTML =
+            `
+            <div class="empty">
+                🔴 Không có trận phù hợp
+            </div>
+            `;
+
+        return;
+    }
+
+
+    list.innerHTML =
+        "";
+
+
+    for (
+        const match
+        of filtered
+    ) {
+
+        const box =
+            document.createElement(
+                "div"
+            );
+
+
+        box.className =
+            "match";
+
+
+        if (
+            currentMatch &&
+            currentMatch.key ===
+            match.key
+        ) {
+
+            box.classList.add(
+                "selected"
+            );
+        }
+
+
+        // ==================================================
+        // HEADER
+        // ==================================================
+
+        const header =
+            document.createElement(
+                "div"
+            );
+
+
+        header.className =
+            "match-header";
+
+
+        const time =
+            document.createElement(
+                "div"
+            );
+
+
+        time.className =
+            "match-time";
+
+
+        const d =
+            new Date(
+                match.startAt
+            );
+
+
+        time.textContent =
+            "Bắt đầu " +
+            String(
+                d.getHours()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                d.getMinutes()
+            ).padStart(2, "0");
+
+
+        const live =
+            document.createElement(
+                "div"
+            );
+
+
+        live.className =
+            "live-badge";
+
+
+        live.innerHTML =
+            `
+            <span class="live-dot"></span>
+            LIVE
+            `;
+
+
+        header.appendChild(
+            time
+        );
+
+
+        header.appendChild(
+            live
+        );
+
+
+        box.appendChild(
+            header
+        );
+
+
+        // ==================================================
+        // MATCH NAME
+        // ==================================================
+
+        const name =
+            document.createElement(
+                "div"
+            );
+
+
+        name.className =
+            "match-name";
+
+
+        name.textContent =
+            match.name;
+
+
+        box.appendChild(
+            name
+        );
+
+
+        // ==================================================
+        // SOURCE
+        // ==================================================
+
+        if (
+            currentSource ===
+            "Tất cả"
+        ) {
+
+            const sources =
+                [
+                    ...new Set(
+                        (
+                            match.channels ||
+                            []
+                        )
+                            .map(
+                                ch =>
+                                    ch.source
+                            )
+                            .filter(Boolean)
+                    )
+                ];
+
+
+            const sourceDiv =
+                document.createElement(
+                    "div"
+                );
+
+
+            sourceDiv.className =
+                "match-source";
+
+
+            sourceDiv.textContent =
+                "🌐 " +
+                sources.join(
+                    " • "
+                );
+
+
+            box.appendChild(
+                sourceDiv
+            );
+        }
+
+
+        // ==================================================
+        // CHANNELS CỦA SOURCE ĐANG CHỌN
+        // ==================================================
+
+        const visibleChannels =
+            currentSource ===
+            "Tất cả"
+
+                ? (
+                    match.channels ||
+                    []
+                )
+
+                : (
+                    match.channels ||
+                    []
+                ).filter(
+                    ch =>
+                        String(
+                            ch.source ||
+                            ""
+                        ).trim() ===
+                        currentSource
+                );
+
+
+        // ==================================================
+        // FOOTER
+        // ==================================================
+
+        const footer =
+            document.createElement(
+                "div"
+            );
+
+
+        footer.className =
+            "match-footer";
+
+
+        const count =
+            document.createElement(
+                "span"
+            );
+
+
+        count.className =
+            "match-blv-count";
+
+
+        count.textContent =
+            `📺 ${visibleChannels.length} kênh thể thao`;
+
+
+        const watch =
+            document.createElement(
+                "span"
+            );
+
+
+        watch.className =
+            "watch-text";
+
+
+        watch.textContent =
+            "▶ XEM TRẬN";
+
+
+        footer.appendChild(
+            count
+        );
+
+
+        footer.appendChild(
+            watch
+        );
+
+
+        box.appendChild(
+            footer
+        );
+
+
+        // ==================================================
+        // CLICK
+        // ==================================================
+
+        box.onclick =
+            () => {
+
+                openMatch(
+                    match
+                );
+            };
+
+
+        list.appendChild(
+            box
+        );
+    }
+}
+
+
+// =====================================================
+// SOURCE GROUPS
+// =====================================================
+
+function renderFootballGroups() {
+
+    groups.innerHTML =
+        "";
+
+
+    // ==================================================
+    // TẤT CẢ
+    // ==================================================
+
+    const all =
+        document.createElement(
+            "button"
+        );
+
+
+    all.className =
+        "group " +
+        (
+            currentSource ===
+            "Tất cả"
+                ? "active"
+                : ""
+        );
+
+
+    all.textContent =
+        "Tất cả";
+
+
+    all.onclick =
+        () => {
+
+            currentSource =
+                "Tất cả";
+
+
+            currentMatch =
+                null;
+
+
+            hideBlv();
+
+
+            renderFootball();
+        };
+
+
+    groups.appendChild(
+        all
+    );
+
+
+    // ==================================================
+    // SOURCE MAP
+    // ==================================================
+
+    const sourceMap =
+        new Map();
+
+
+    for (
+        const match
+        of allData
+    ) {
+
+        for (
+            const ch
+            of (
+                match.channels ||
+                []
+            )
+        ) {
+
+            const source =
+                String(
+                    ch.source ||
+                    ""
+                ).trim();
+
+
+            if (!source) {
+                continue;
+            }
+
+
+            if (
+                !sourceMap.has(
+                    source
+                )
+            ) {
+
+                sourceMap.set(
+                    source,
+                    {
+
+                        name:
+                            source,
+
+                        logo:
+                            ch.sourceLogo ||
+                            ""
+                    }
+                );
+            }
+        }
+    }
+
+
+    // ==================================================
+    // TẠO BUTTON SOURCE
+    // ==================================================
+
+    for (
+        const source
+        of sourceMap.values()
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "group " +
+            (
+                currentSource ===
+                source.name
+                    ? "active"
+                    : ""
+            );
+
+
+        if (
+            source.logo
+        ) {
+
+            const img =
+                document.createElement(
+                    "img"
+                );
+
+
+            img.className =
+                "source-logo";
+
+
+            img.src =
+                source.logo;
+
+
+            img.onerror =
+                () => {
+
+                    img.style.display =
+                        "none";
+                };
+
+
+            button.appendChild(
+                img
+            );
+        }
+
+
+        button.appendChild(
+            document.createTextNode(
+                source.name
+            )
+        );
+
+
+        button.onclick =
+            () => {
+
+                currentSource =
+                    source.name;
+
+
+                currentMatch =
+                    null;
+
+
+                currentChannel =
+                    null;
+
+
+                hideBlv();
+
+
+                renderFootball();
+            };
+
+
+        groups.appendChild(
+            button
+        );
+    }
+}
+
+
+// =====================================================
+// OPEN MATCH
+// =====================================================
+
+async function openMatch(
+    match
+) {
+
+    currentMatch =
+        match;
+
+
+    // ==================================================
+    // CHỈ LẤY STREAM THUỘC SOURCE ĐANG CHỌN
+    // ==================================================
+
+    let channels =
+        match.channels ||
+        [];
+
+
+    if (
+        currentSource !==
+        "Tất cả"
+    ) {
+
+        channels =
+            channels.filter(
+                ch =>
+                    String(
+                        ch.source ||
+                        ""
+                    ).trim() ===
+                    currentSource
+            );
+    }
+
+
+    if (!channels.length) {
+
+        return;
+    }
+
+
+    currentChannel =
+        channels[0];
+
+
+    renderFootball();
+
+
+    renderBLVButtons(
+        channels
+    );
+
+
+    await playFootballChannel(
+        currentChannel
+    );
+}
+
+
+// =====================================================
+// SPORT CHANNEL BUTTONS
+// =====================================================
+
+function renderBLVButtons(
+    channels = null
+) {
+
+    if (
+        !channels
+    ) {
+
+        if (
+            !currentMatch
+        ) {
+
+            hideBlv();
+
+            return;
+        }
+
+
+        channels =
+            currentMatch.channels ||
+            [];
+
+
+        if (
+            currentSource !==
+            "Tất cả"
+        ) {
+
+            channels =
+                channels.filter(
+                    ch =>
+                        String(
+                            ch.source ||
+                            ""
+                        ).trim() ===
+                        currentSource
+                );
+        }
+    }
+
+
+    if (
+        !channels.length
+    ) {
+
+        hideBlv();
+
+        return;
+    }
+
+
+    blvPanel.style.display =
+        "block";
+
+
+    blvButtons.innerHTML =
+        "";
+
+
+    channels.forEach(
+        (
+            channel,
+            index
+        ) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.className =
+                "blv-button";
+
+
+            if (
+                currentChannel &&
+                currentChannel.streamId ===
+                channel.streamId
+            ) {
+
+                button.classList.add(
+                    "active"
+                );
+            }
+
+
+            button.textContent =
+                channel.commentator ||
+                `Kênh ${index + 1}`;
+
+
+            button.onclick =
+                async e => {
+
+                    e.stopPropagation();
+
+
+                    currentChannel =
+                        channel;
+
+
+                    renderBLVButtons(
+                        channels
+                    );
+
+
+                    await playFootballChannel(
+                        channel
+                    );
+                };
+
+
+            blvButtons.appendChild(
+                button
+            );
+        }
+    );
+}
+
+
+// =====================================================
+// SOURCE INFO
+// =====================================================
+
+function showCurrentSource(
+    channel
+) {
+
+    if (
+        !channel
+    ) {
+
+        currentSourceBox.style.display =
+            "none";
+
+        return;
+    }
+
+
+    currentSourceBox.innerHTML =
+        "";
+
+
+    if (
+        channel.sourceLogo
+    ) {
+
+        const img =
+            document.createElement(
+                "img"
+            );
+
+
+        img.src =
+            channel.sourceLogo;
+
+
+        img.onerror =
+            () => {
+
+                img.style.display =
+                    "none";
+            };
+
+
+        currentSourceBox.appendChild(
+            img
+        );
+    }
+
+
+    currentSourceBox.appendChild(
+        document.createTextNode(
+            "🌐 " +
+            (
+                channel.source ||
+                "Nguồn khác"
+            )
+        )
+    );
+
+
+    currentSourceBox.style.display =
+        "inline-flex";
+}
+
+
+// =====================================================
+// HIDE BLV
+// =====================================================
+
+function hideBlv() {
+
+    blvPanel.style.display =
+        "none";
+
+
+    blvButtons.innerHTML =
+        "";
+}
+
+
+// =====================================================
+// PLAY FOOTBALL
+// =====================================================
+
+async function playFootballChannel(
+    channel
+) {
+
+    errorBox.textContent =
+        "";
+
+
+    title.textContent =
+        currentMatch
+            ? currentMatch.name
+            : "Đang phát";
+
+
+    status.textContent =
+        "Đang mở...";
+
+
+    showCurrentSource(
+        channel
+    );
+
+
+    try {
+
+        const cacheKey =
+            "football:" + channel.streamId;
+
+        const cached =
+            streamCache.get(cacheKey);
+
+        let result;
+
+        if (
+            cached &&
+            Date.now() - cached.time <
+                STREAM_CACHE_TIME
+        ) {
+            result = cached.data;
+        } else {
+            const response =
+                await fetch(
+                    "/api/football/stream/" +
+                    encodeURIComponent(
+                        channel.streamId
+                    )
+                );
+
+            result =
+                await response.json();
+
+            if (result.ok) {
+                streamCache.set(
+                    cacheKey,
+                    {
+                        time: Date.now(),
+                        data: result
+                    }
+                );
+            }
+        }
+
+
+        if (
+            !result.ok
+        ) {
+
+            throw new Error(
+                result.error ||
+                "Không lấy được stream"
+            );
+        }
+
+
+        await stopPlayer();
+
+
+        const url =
+            result.playUrl ||
+            result.url;
+
+
+        // ==================================================
+        // DASH
+        // ==================================================
+
+        if (
+            isMPD(url) ||
+            Object.keys(
+                result.clearKeys ||
+                {}
+            ).length
+        ) {
+
+            currentDashUrl = url;
+            dashRecoveryAttempts = 0;
+
+            if (
+                !shakaPlayer
+            ) {
+
+                await initPlayer();
+            }
+
+
+            shakaPlayer.configure({
+
+                drm: {
+
+                    clearKeys:
+                        result.clearKeys ||
+                        {}
+                }
+            });
+
+
+            await shakaPlayer.load(
+                url
+            );
+
+            populateShakaQualities();
+
+
+            status.textContent =
+                "🔴 Đang phát • " +
+                (
+                    channel.commentator ||
+                    "Kênh thể thao"
+                );
+
+
+            return;
+        }
+
+
+        // ==================================================
+        // HLS
+        // ==================================================
+
+        if (
+            result.kind === "hls" ||
+            isHLS(url)
+        ) {
+
+            await playHLS(
+                url
+            );
+
+            return;
+        }
+
+        if (
+            result.contentType === "video/mp2t" ||
+            /\.ts(?:\?|$)/i.test(url)
+        ) {
+            await playMpegTs(url);
+            status.textContent =
+                "🔴 Đang phát • " +
+                (channel.commentator || "Kênh thể thao");
+            return;
+        }
+
+
+        // ==================================================
+        // VIDEO
+        // ==================================================
+
+        video.src =
+            url;
+
+
+        await video.play();
+
+
+        status.textContent =
+            "🔴 Đang phát • " +
+            (
+                channel.commentator ||
+                "Kênh thể thao"
+            );
+
+    } catch (err) {
+
+        console.error(
+            "FOOTBALL PLAY ERROR:",
+            err
+        );
+
+
+        status.textContent =
+            "Không phát được";
+
+
+        errorBox.textContent =
+            err.message ||
+            String(err);
+    }
+}
+
+
+// =====================================================
+// HLS
+// =====================================================
+
+async function playHLS(
+    url
+) {
+
+    /*
+     * playHLS() được gọi sau stopPlayer()
+     * nên lúc này HLS/Shaka cũ đã được hủy.
+     */
+
+    if (
+        typeof Hls !== "undefined" &&
+        Hls.isSupported()
+    ) {
+
+        hlsPlayer =
+            new Hls({
+
+                enableWorker:
+                    true,
+
+                lowLatencyMode:
+                    true,
+
+                liveSyncDurationCount:
+                    4,
+
+                liveMaxLatencyDurationCount:
+                    8,
+
+                maxLiveSyncPlaybackRate:
+                    1.5,
+
+                backBufferLength:
+                    20,
+
+                maxBufferLength:
+                    12,
+
+                manifestLoadingMaxRetry:
+                    5,
+
+                levelLoadingMaxRetry:
+                    5,
+
+                fragLoadingMaxRetry:
+                    5,
+
+                fragLoadingMaxRetryTimeout:
+                    3000
+            });
+
+
+        hlsPlayer.on(
+            Hls.Events.ERROR,
+            (
+                event,
+                data
+            ) => {
+
+                console.error(
+                    "HLS ERROR:",
+                    data
+                );
+
+
+                if (!data.fatal) {
+                    return;
+                }
+
+
+                if (
+                    data.type ===
+                    Hls.ErrorTypes.NETWORK_ERROR
+                ) {
+
+                    try {
+                        hlsPlayer.startLoad();
+                    } catch {}
+
+                    return;
+                }
+
+
+                if (
+                    data.type ===
+                    Hls.ErrorTypes.MEDIA_ERROR
+                ) {
+
+                    try {
+                        hlsPlayer.recoverMediaError();
+                    } catch {}
+
+                    return;
+                }
+
+
+                errorBox.textContent =
+                    "HLS Error:\n" +
+                    JSON.stringify(
+                        data,
+                        null,
+                        2
+                    );
+            }
+        );
+
+
+        hlsPlayer.on(
+            Hls.Events.MANIFEST_PARSED,
+            async () => {
+
+                populateHlsQualities();
+
+                try {
+
+                    await video.play();
+
+                    status.textContent =
+                        "🔴 Đang phát";
+
+                } catch (e) {
+
+                    console.warn(
+                        "Autoplay:",
+                        e
+                    );
+                }
+            }
+        );
+
+
+        hlsPlayer.attachMedia(
+            video
+        );
+
+
+        hlsPlayer.loadSource(
+            url
+        );
+
+
+        return;
+    }
+
+
+    /*
+     * Safari / browser có HLS native
+     */
+
+    if (
+        video.canPlayType(
+            "application/vnd.apple.mpegurl"
+        )
+    ) {
+
+        video.src =
+            url;
+
+
+        await video.play();
+
+
+        status.textContent =
+            "🔴 Đang phát";
+
+        return;
+    }
+
+
+    throw new Error(
+        "Trình duyệt không hỗ trợ HLS"
+    );
+}
+
+let mpegtsRecoverCount = 0;
+
+function playMpegTsOnce(url) {
+    mpegtsPlayer = mpegts.createPlayer(
+        {
+            type: "mpegts",
+            url,
+            isLive: true
+        },
+        {
+            enableWorker: true,
+            enableStashBuffer: false,
+            liveBufferLatencyChasing: true,
+            liveBufferLatencyMaxLatency: 8,
+            liveBufferLatencyMinRemain: 2
+        }
+    );
+
+    mpegtsPlayer.on(
+        mpegts.Events.ERROR,
+        (type, detail) => {
+            console.error(
+                "MPEGTS ERROR:",
+                type,
+                detail
+            );
+
+            if (
+                mpegtsPlayer &&
+                mpegtsPlayer.mediaSource &&
+                video.currentTime > 0
+            ) {
+                // Lỗi nhẹ, thử tiếp tục tải
+                try {
+                    mpegtsPlayer.load();
+                    mpegtsPlayer.play();
+                } catch {}
+
+                return;
+            }
+
+            // Lỗi nghiêm trọng: dựng lại player (tối đa 3 lần)
+            mpegtsRecoverCount++;
+
+            if (mpegtsRecoverCount > 3) {
+                errorBox.textContent =
+                    "MPEG-TS Error:\n" +
+                    type +
+                    " " +
+                    (detail?.message || "");
+                return;
+            }
+
+            const retryUrl = url;
+
+            mpegtsPlayer?.destroy?.().catch?.(() => {});
+            mpegtsPlayer = null;
+
+            setTimeout(() => {
+                try {
+                    playMpegTsOnce(retryUrl);
+                    mpegtsPlayer?.play?.();
+                } catch {}
+            }, 800);
+        }
+    );
+
+    mpegtsPlayer.attachMediaElement(video);
+    mpegtsPlayer.load();
+    mpegtsPlayer.play();
+}
+
+async function playMpegTs(url) {
+    if (
+        typeof mpegts === "undefined" ||
+        !mpegts.isSupported()
+    ) {
+        throw new Error(
+            "Trình duyệt chưa hỗ trợ MPEG-TS"
+        );
+    }
+
+    mpegtsRecoverCount = 0;
+        
+    playMpegTsOnce(url);
+}
+
+// =====================================================
+// BÓNG ĐÁ VN
+// =====================================================
+// Màn 1: hiện thẻ các website (Giờ Vàng, Chuối Chiên...)
+// Màn 2: bấm vào 1 website -> hiện thẻ các trận + nút quay lại.
+
+function renderVnFootball() {
+
+    footballFilters.style.display =
+        "none";
+
+    groups.innerHTML =
+        "";
+
+    list.innerHTML =
+        "";
+
+    if (
+        !vnSites.length
+    ) {
+
+        list.innerHTML =
+            `
+            <div class="empty">
+                🇻🇳 Không có trận nào trong khoảng ±3 giờ
+            </div>
+            `;
+
+        return;
+    }
+
+    // ==================================================
+    // MÀN 2: ĐÃ CHỌN WEBSITE -> HIỆN CÁC TRẬN
+    // ==================================================
+
+    if (
+        currentVnSite
+    ) {
+
+        renderVnMatchList();
+
+        return;
+    }
+
+    // ==================================================
+    // MÀN 1: DANH SÁCH WEBSITE
+    // ==================================================
+
+    const label =
+        document.createElement(
+            "div"
+        );
+
+    label.className =
+        "empty";
+
+    label.style.padding =
+        "6px 2px 12px";
+
+    label.textContent =
+        "🇻🇳 Chọn trang để xem trận:";
+
+    list.appendChild(
+        label
+    );
+
+    for (
+        const site
+        of vnSites
+    ) {
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className =
+            "channel";
+
+        if (
+            site.logo
+        ) {
+
+            const img =
+                document.createElement(
+                    "img"
+                );
+
+            img.className =
+                "logo";
+
+            setupLogoImg(
+                img,
+                site.logo
+            );
+
+            card.appendChild(
+                img
+            );
+        }
+
+        const name =
+            document.createElement(
+                "div"
+            );
+
+        name.className =
+            "channel-name";
+
+        name.textContent =
+            site.name +
+            "  (" +
+            (site.matches ? site.matches.length : 0) +
+            " trận)";
+
+        card.appendChild(
+            name
+        );
+
+        card.onclick =
+            () => {
+
+                currentVnSite =
+                    site.name;
+
+                currentVnMatch =
+                    null;
+
+                renderVnFootball();
+            };
+
+        list.appendChild(
+            card
+        );
+    }
+}
+
+// =====================================================
+// MÀN 2: DANH SÁCH TRẬN CỦA 1 WEBSITE
+// =====================================================
+
+function renderVnMatchList() {
+
+    const site =
+        vnSites.find(
+            s =>
+                s.name ===
+                currentVnSite
+        );
+
+    const matches =
+        site && site.matches
+            ? site.matches
+            : [];
+
+    // Nếu đang phát 1 trận -> hiện panel đổi luồng/BLV
+    if (
+        currentVnMatch
+    ) {
+
+        renderVnMatchDetail();
+
+        return;
+    }
+
+    // Nút quay lại chọn website
+    const back =
+        document.createElement(
+            "button"
+        );
+
+    back.className =
+        "blv-button";
+
+    back.style.marginBottom =
+        "10px";
+
+    back.textContent =
+        "⟵ Quay lại";
+
+    back.onclick =
+        () => {
+
+            currentVnSite =
+                null;
+
+            renderVnFootball();
+        };
+
+    list.appendChild(
+        back
+    );
+
+    if (!matches.length) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+        empty.className =
+            "empty";
+
+        empty.textContent =
+            "Không có trận nào phù hợp";
+
+        list.appendChild(
+            empty
+        );
+
+        return;
+    }
+
+    for (
+        const match
+        of matches
+    ) {
+
+        const box =
+            document.createElement(
+                "div"
+            );
+
+        box.className =
+            "vn-match-card";
+
+        // Logo (doi bong) ben trai
+        if (
+            match.logo
+        ) {
+
+            const img =
+                document.createElement(
+                    "img"
+                );
+
+            img.className =
+                "vn-match-logo";
+
+            setupLogoImg(
+                img,
+                match.logo
+            );
+
+            box.appendChild(
+                img
+            );
+        }
+
+        const body =
+            document.createElement(
+                "div"
+            );
+
+        body.className =
+            "vn-match-body";
+
+        const head =
+            document.createElement(
+                "div"
+            );
+
+        head.className =
+            "vn-match-head";
+
+        const timeEl =
+            document.createElement(
+                "span"
+            );
+
+        timeEl.className =
+            "vn-match-time";
+
+        timeEl.textContent =
+            match.time ||
+            "LIVE";
+
+        head.appendChild(
+            timeEl
+        );
+
+        const liveEl =
+            document.createElement(
+                "span"
+            );
+
+        liveEl.className =
+            "live-badge";
+
+        liveEl.innerHTML =
+            '<span class="live-dot"></span>LIVE';
+
+        head.appendChild(
+            liveEl
+        );
+
+        body.appendChild(
+            head
+        );
+
+        const titleEl =
+            document.createElement(
+                "div"
+            );
+
+        titleEl.className =
+            "vn-match-title";
+
+        titleEl.textContent =
+            match.title ||
+            "Trận đấu";
+
+        body.appendChild(
+            titleEl
+        );
+
+        const foot =
+            document.createElement(
+                "div"
+            );
+
+        foot.className =
+            "vn-match-foot";
+
+        foot.textContent =
+            match.streams.length +
+            " luồng  •  ▶ XEM";
+
+        body.appendChild(
+            foot
+        );
+
+        box.appendChild(
+            body
+        );
+
+        box.onclick =
+            () =>
+                playVnMatch(
+                    match
+                );
+
+        list.appendChild(
+            box
+        );
+    }
+}
+
+// =====================================================
+// PANEL ĐANG PHÁT + ĐỔI LUỒNG/BLV
+// =====================================================
+
+function renderVnMatchDetail() {
+
+    const match =
+        currentVnMatch;
+
+    const back =
+        document.createElement(
+            "button"
+        );
+
+    back.className =
+        "blv-button";
+
+    back.style.marginBottom =
+        "10px";
+
+    back.textContent =
+        "⟵ Danh sách trận";
+
+    back.onclick =
+        () => {
+
+            currentVnMatch =
+                null;
+
+            renderVnFootball();
+        };
+
+    list.appendChild(
+        back
+    );
+
+    const info =
+        document.createElement(
+            "div"
+        );
+
+    info.className =
+        "vn-match-title";
+
+    info.style.margin =
+        "4px 2px 12px";
+
+    info.textContent =
+        (match.time ? match.time + "  •  " : "") +
+        match.title;
+
+    list.appendChild(
+        info
+    );
+
+    const label =
+        document.createElement(
+            "div"
+        );
+
+    label.className =
+        "blv-label";
+
+    label.textContent =
+        "Chọn luồng / BLV:";
+
+    list.appendChild(
+        label
+    );
+
+    const wrap =
+        document.createElement(
+            "div"
+        );
+
+    wrap.className =
+        "blv-buttons";
+
+    wrap.style.marginBottom =
+        "10px";
+
+    for (
+        const stream
+        of match.streams
+    ) {
+
+        const btn =
+            document.createElement(
+                "button"
+            );
+
+        btn.className =
+            "blv-button" +
+            (
+                currentChannel &&
+                currentChannel.url ===
+                stream.url
+                    ? " active"
+                    : ""
+            );
+
+        btn.textContent =
+            stream.name;
+
+        btn.onclick =
+            async () => {
+
+                await playVnStream(
+                    stream
+                );
+
+                renderVnFootball();
+            };
+
+        wrap.appendChild(
+            btn
+        );
+    }
+
+    list.appendChild(
+        wrap
+    );
+}
+
+// =====================================================
+// PHÁT 1 TRẬN BÓNG ĐÁ VN (dùng chung pipeline với TV)
+// =====================================================
+
+async function playVnMatch(match) {
+
+    currentVnMatch =
+        match;
+
+    // Render panel (doi luong/BLV) TRUOC khi bat dau phat de nguoi
+    // dung thay ngay danh sach luong, khong phai cho player resolve.
+    renderVnFootball();
+
+    if (
+        match.streams.length
+    ) {
+
+        await playVnStream(
+            match.streams[0]
+        );
+
+        // Sau khi phat xong thi cap nhat lai trang thai nut active.
+        renderVnFootball();
+    }
+}
+
+// Phát 1 luồng (BLV) cụ thể của trận đang chọn.
+async function playVnStream(stream) {
+
+    const channel = {
+
+        name:
+            (currentVnMatch && currentVnMatch.title
+                ? currentVnMatch.title
+                : "Trận đấu") +
+            " (" + stream.name + ")",
+
+        logo:
+            currentVnMatch && currentVnMatch.logo
+                ? currentVnMatch.logo
+                : "",
+
+        group:
+            currentVnSite || "",
+
+        url:
+            stream.url,
+
+        headers:
+            stream.headers || {},
+
+        clearKeys:
+            stream.clearKeys || {}
+    };
+
+    currentChannel =
+        channel;
+
+    await playTV(
+        channel
+    );
+}
+
+// =====================================================
+// TV
+// =====================================================
+
+function renderTV() {
+
+    footballFilters.style.display =
+        "none";
+
+    const filtered =
+        allData.slice();
+
+
+    renderTVGroups(
+        filtered
+    );
+
+
+    list.innerHTML =
+        "";
+
+
+    for (
+        const channel
+        of filtered
+    ) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.className =
+            "channel";
+
+
+        if (
+            channel.logo
+        ) {
+
+                const img =
+                    document.createElement(
+                        "img"
+                    );
+
+                img.className =
+                    "logo";
+
+                setupLogoImg(
+                    img,
+                    channel.logo
+                );
+
+                div.appendChild(
+                    img
+                );
+            }
+
+
+        const name =
+            document.createElement(
+                "div"
+            );
+
+
+        name.className =
+            "channel-name";
+
+
+        name.textContent =
+            channel.name;
+
+
+        div.appendChild(
+            name
+        );
+
+
+        div.onclick =
+            () =>
+                playTV(
+                    channel
+                );
+
+
+        list.appendChild(
+            div
+        );
+    }
+}
+
+
+// =====================================================
+// TV GROUPS
+// =====================================================
+
+function renderTVGroups(
+    filtered
+) {
+
+    groups.innerHTML =
+        "";
+
+
+    const unique =
+        [
+            ...new Set(
+                filtered
+                    .map(
+                        x =>
+                            x.group
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+    for (
+        const g
+        of unique
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "group";
+
+
+        button.textContent =
+            g;
+
+
+        button.onclick =
+            () => {
+
+                const tvFiltered =
+                    allData.filter(
+                        x =>
+                            x.group === g
+                    );
+
+
+                renderTVList(
+                    tvFiltered
+                );
+            };
+
+
+        groups.appendChild(
+            button
+        );
+    }
+}
+
+
+function renderTVList(
+    channels
+) {
+
+    list.innerHTML =
+        "";
+
+
+    for (
+        const channel
+        of channels
+    ) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.className =
+            "channel";
+
+
+        if (
+            channel.logo
+        ) {
+
+            const img =
+                document.createElement(
+                    "img"
+                );
+
+
+                img.className =
+                    "logo";
+
+                setupLogoImg(
+                    img,
+                    channel.logo
+                );
+
+                div.appendChild(
+                    img
+                );
+            }
+
+
+        const name =
+            document.createElement(
+                "div"
+            );
+
+
+        name.className =
+            "channel-name";
+
+
+        name.textContent =
+            channel.name;
+
+
+        div.appendChild(
+            name
+        );
+
+
+        div.onclick =
+            () =>
+                playTV(
+                    channel
+                );
+
+
+        list.appendChild(
+            div
+        );
+    }
+}
+
+
+// =====================================================
+// TV PLAY
+// =====================================================
+
+async function playTV(channel) {
+
+    errorBox.textContent = "";
+
+    hideBlv();
+
+    currentSourceBox.style.display = "none";
+
+    title.textContent =
+        channel.name || "Đang phát";
+
+    status.textContent = "Đang mở...";
+
+    try {
+
+        console.log("================================");
+        console.log("TV PLAY START");
+        console.log("CHANNEL:", channel.name);
+        console.log("SOURCE URL:", channel.url);
+
+        const cacheKey =
+            "tv:" + channel.url;
+
+        const cached =
+            streamCache.get(cacheKey);
+
+        let result;
+
+        if (
+            cached &&
+            Date.now() - cached.time <
+                STREAM_CACHE_TIME
+        ) {
+            result = cached.data;
+        } else {
+            // Nguon (livesport, tv360, vtvprime...) chap chon: co luc
+            // 502/404/network loi -> tu thu lai vai lan truoc khi bao loi.
+            const RESOLVE_ATTEMPTS = 3;
+
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= RESOLVE_ATTEMPTS; attempt++) {
+                try {
+
+                    const response = await fetch(
+                        "/api/resolve?url=" +
+                        encodeURIComponent(channel.url)
+                    );
+
+                    console.log(
+                        "RESOLVE HTTP:",
+                        response.status,
+                        "(lan " + attempt + ")"
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "Resolve HTTP " +
+                            response.status
+                        );
+                    }
+
+                    result = await response.json();
+
+                    if (!result.ok) {
+                        throw new Error(
+                            result.error ||
+                            "Resolve failed"
+                        );
+                    }
+
+                    streamCache.set(
+                        cacheKey,
+                        {
+                            time: Date.now(),
+                            data: result
+                        }
+                    );
+
+                    lastError = null;
+                    break;
+
+                } catch (e) {
+
+                    lastError = e;
+
+                    if (attempt < RESOLVE_ATTEMPTS) {
+                        status.textContent =
+                            "Đang thử lại (" + attempt + "/" + RESOLVE_ATTEMPTS + ")...";
+
+                        await new Promise(r =>
+                            setTimeout(r, 1200 * attempt)
+                        );
+                    }
+                }
+            }
+
+            if (lastError) {
+                throw lastError;
+            }
+        }
+
+        console.log("RESOLVE RESULT:", result);
+
+        if (!result.ok) {
+            throw new Error(
+                result.error ||
+                "Resolve failed"
+            );
+        }
+
+        await stopPlayer();
+
+        const url =
+            result.playUrl ||
+            result.finalUrl ||
+            result.url ||
+            channel.url;
+
+        const clearKeys =
+            result.clearKeys || {};
+
+        console.log("PLAY URL:", url);
+        console.log("KIND:", result.kind);
+        console.log("CLEARKEYS:", clearKeys);
+        console.log(
+            "CLEARKEY COUNT:",
+            Object.keys(clearKeys).length
+        );
+
+        // ==============================
+        // HLS
+        // ==============================
+
+        if (
+            result.kind === "hls" ||
+            isHLS(url)
+        ) {
+
+            console.log(
+                "TV PLAY TYPE: HLS"
+            );
+
+            await playHLS(url);
+
+            status.textContent =
+                "🔴 Đang phát";
+
+            return;
+        }
+
+        if (
+            result.contentType === "video/mp2t" ||
+            /\.ts(?:\?|$)/i.test(url)
+        ) {
+            await playMpegTs(url);
+            status.textContent = "🔴 Đang phát";
+            return;
+        }
+
+        // ==============================
+        // DASH
+        // ==============================
+
+        if (
+            result.kind === "dash" ||
+            isMPD(url)
+        ) {
+
+            currentDashUrl = url;
+            dashRecoveryAttempts = 0;
+
+            console.log(
+                "TV PLAY TYPE: DASH"
+            );
+
+            await initPlayer();
+
+            // Cấu hình ClearKey TRƯỚC khi load MPD để Shaka đọc
+            // DRM config ngay tại thời điểm load() — choantuoi
+            // nếu để sau thì Shaka có thể đãGc/clear config cũ.
+            if (
+                Object.keys(clearKeys).length > 0
+            ) {
+
+                console.log(
+                    "CONFIG CLEARKEY"
+                );
+
+                await shakaPlayer.configure({
+                    drm: {
+                        clearKeys:
+                            clearKeys
+                    }
+                });
+            }
+
+            console.log(
+                "SHAKA LOAD:",
+                url
+            );
+
+            await shakaPlayer.load(url);
+
+            populateShakaQualities();
+
+            console.log(
+                "SHAKA LOAD SUCCESS"
+            );
+
+            status.textContent =
+                "🔴 Đang phát";
+
+            return;
+        }
+
+        // ==============================
+        // DIRECT VIDEO
+        // ==============================
+
+        console.log(
+            "TV PLAY TYPE: DIRECT VIDEO"
+        );
+
+        video.src = url;
+
+        await video.play();
+
+        status.textContent =
+            "🔴 Đang phát";
+
+    } catch (err) {
+
+        console.error(
+            "================================"
+        );
+
+        console.error(
+            "TV PLAY ERROR:",
+            err
+        );
+
+        console.error(
+            "NAME:",
+            err?.name
+        );
+
+        console.error(
+            "MESSAGE:",
+            err?.message
+        );
+
+        console.error(
+            "STACK:",
+            err?.stack
+        );
+
+        console.error(
+            "================================"
+        );
+
+        status.textContent =
+            "Không phát được";
+
+        errorBox.textContent =
+            (err?.message || String(err));
+    }
+}
+
+// =====================================================
+// STOP
+// =====================================================
+
+async function stopPlayer() {
+
+    if (mpegtsPlayer) {
+        try {
+            mpegtsPlayer.pause();
+            mpegtsPlayer.unload();
+            mpegtsPlayer.detachMediaElement();
+            mpegtsPlayer.destroy();
+        } catch (e) {
+            console.warn("MPEG-TS destroy error:", e);
+        }
+
+        mpegtsPlayer = null;
+    }
+
+
+    resetQualityOptions();
+
+    // ==============================
+    // HỦY HLS
+    // ==============================
+
+    if (hlsPlayer) {
+
+        try {
+            await hlsPlayer.destroy();
+        } catch (e) {
+            console.warn(
+                "HLS destroy error:",
+                e
+            );
+        }
+
+        hlsPlayer = null;
+    }
+
+
+    // ==============================
+    // HỦY SHAKA HOÀN TOÀN
+    // ==============================
+
+    if (shakaPlayer) {
+
+        try {
+            await shakaPlayer.destroy();
+        } catch (e) {
+            console.warn(
+                "Shaka destroy error:",
+                e
+            );
+        }
+
+        shakaPlayer = null;
+    }
+
+
+    // ==============================
+    // RESET VIDEO
+    // ==============================
+
+    try {
+        video.pause();
+    } catch {}
+
+
+    video.removeAttribute("src");
+
+    video.load();
+}
+
+
+// =====================================================
+// TYPE
+// =====================================================
+
+function isMPD(
+    url
+) {
+
+    const u =
+        String(url || "");
+
+
+    return (
+        /\.mpd(?:\?|$)/i.test(u) ||
+        /manifest\.mpd/i.test(u)
+    );
+}
+
+
+function isHLS(
+    url
+) {
+
+    const u =
+        String(url || "");
+
+
+    return (
+        /\.m3u8(?:\?|$)/i.test(u) ||
+        /m3u8/i.test(u)
+    );
+}
+
+
+// =====================================================
+// SEARCH (đã bỏ thanh tìm kiếm trận)
+// =====================================================
+
+
+// =====================================================
+// LOGO HELPER
+// =====================================================
+// lazy + no-referrer: tranh logo ben ngoai chan load/chan render,
+// va tu an khi loi (nhieu logo nguon khong cho hot-link).
+
+function setupLogoImg(img, src) {
+
+    img.loading = "lazy";
+
+    img.referrerPolicy = "no-referrer";
+
+    img.src = src;
+
+    img.onerror = () => {
+
+        img.style.display = "none";
+    };
+}
+
+// =====================================================
+// ESCAPE
+// =====================================================
+
+function escapeHtml(
+    text
+) {
+
+    return String(text)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+}
+
+
+// =====================================================
+// START
+// =====================================================
+
+(async () => {
+
+    try {
+
+        await initPlayer();
+
+    } catch (e) {
+
+        console.error(
+            "PLAYER INIT ERROR:",
+            e
+        );
+    }
+
+
+    await loadData();
+
+
+    footballRefreshTimer =
+        setInterval(
+            async () => {
+
+                if (
+                    mode !==
+                    "football"
+                ) {
+
+                    return;
+                }
+
+
+                try {
+
+                    await loadData();
+
+                } catch (e) {
+
+                    console.error(e);
+                }
+
+            },
+            1200000
+        );
+
+})();
+
+</script>
+
+</body>
+
+</html>

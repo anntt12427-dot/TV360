@@ -1,0 +1,15 @@
+{
+  "name": "tv360-test-player",
+  "version": "1.0.0",
+  "description": "TV360 DASH test player",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
