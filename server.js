@@ -130,6 +130,8 @@ const cache = {
 // Cache playlist 20 phut: nguon livesport phan hoi cham/dan khi goi lien tuc
 // (co luc >18s) -> cache lau hon de giam so lan fetch upstream & tranh 502.
 const CACHE_TIME = Number(process.env.CACHE_TIME_MS) || 20 * 60 * 1000;
+// Khi nguon loi: trong vong TTL nay khong goi lai nguon (tranh spam + 500).
+const PLAYLIST_FAIL_TTL = Number(process.env.PLAYLIST_FAIL_TTL_MS) || 3 * 60 * 1000;
 // Cache MPD 5 phut de fix+verify chi fetch 1 lan (tiet kiem CPU/bandwidth Railway free)
 const MPD_CACHE = new Map();
 const MPD_CACHE_TIME = 5 * 60 * 1000;
@@ -1648,6 +1650,37 @@ function isMatchExpired(name, nowMs = Date.now()) {
     return nowMs - startUtc > MATCH_MAX_AGE_MS;
 }
 
+// Tra ve true neu tran KHONG phai hom nay (ngay mai tro di hoac ngay da qua).
+// Muc dich: chi hien tran hom nay -> giam so the, playlist nhe & load nhanh.
+function isMatchNotToday(name, nowMs = Date.now()) {
+
+    const text = String(name || "");
+
+    const match = text.match(
+        /(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})/
+    );
+
+    // Khong doc duoc ngay -> giu lai (khong loai).
+    if (!match) {
+        return false;
+    }
+
+    const day = Number(match[3]);
+    const month = Number(match[4]);
+
+    if (day < 1 || day > 31 || month < 1 || month > 12) {
+        return false;
+    }
+
+    // Lay ngay hien tai theo mui VN.
+    const nowVN = new Date(nowMs + VN_TZ_OFFSET_MS);
+
+    const nowDay = nowVN.getUTCDate();
+    const nowMonth = nowVN.getUTCMonth() + 1;
+
+    return day !== nowDay || month !== nowMonth;
+}
+
 // ======================================================
 // PARSE TEN TRAN / BLV
 // ======================================================
@@ -1694,6 +1727,15 @@ function parseMatchTitle(rawName) {
 }
 
 // Khoa gom tran: ten tran (bo BLV, bo gio) da chuan hoa.
+// Logo riêng của từng website bóng đá VN
+// (không lấy logo đội bóng làm logo website).
+const KNOWN_SITE_LOGOS = {
+    "Giờ Vàng": "",
+    "Chuối Chiên": "",
+    "Vua Sân Cỏ": "",
+    "Khán Đài": ""
+};
+
 function matchGroupKey(title) {
     return String(title || "")
         .toLowerCase()
@@ -2238,6 +2280,18 @@ async function fetchPlaylist(
         return cache[type].data;
     }
 
+    // Negative cache: vua loi gan day -> khong goi lai nguon don dap.
+    // Giup "khong load lai qua nhieu lan" khi nguon dang chet.
+    if (
+        !force &&
+        cache[type].failTime &&
+        now - cache[type].failTime <
+            PLAYLIST_FAIL_TTL
+    ) {
+
+        return cache[type].data || [];
+    }
+
     console.log(
         "=========================================="
     );
@@ -2251,23 +2305,48 @@ async function fetchPlaylist(
         PLAYLISTS[type]
     );
 
-    const response =
-        await fetchResponseWithRetry(
-            PLAYLISTS[type],
-            FOOTBALL_LIKE.has(type)
-                ? {
-                    // Livesport trả video mồi cho Chrome nhưng trả M3U
-                    // đầy đủ khi được gọi như VLC/FFmpeg.
-                    "User-Agent": "Lavf/61.7.100"
-                }
-                : {},
-            // Playlist cham/chap chon -> thu vai lan.
-            FETCH_ATTEMPTS,
-            // Cho phep bo qua verify khi CDN playlist het cert (nhu vnfootball).
-            FOOTBALL_LIKE.has(type),
-            // Playlist co the rat cham -> cho timeout dai hon.
-            PLAYLIST_TIMEOUT_MS
-        );
+    let response;
+
+    try {
+
+        response =
+            await fetchResponseWithRetry(
+                PLAYLISTS[type],
+                FOOTBALL_LIKE.has(type)
+                    ? {
+                        // Livesport trả video mồi cho Chrome nhưng trả M3U
+                        // đầy đủ khi được gọi như VLC/FFmpeg.
+                        "User-Agent": "Lavf/61.7.100"
+                    }
+                    : {},
+                // Playlist cham/chap chon -> thu vai lan.
+                FETCH_ATTEMPTS,
+                // Cho phep bo qua verify khi CDN playlist het cert (nhu vnfootball).
+                FOOTBALL_LIKE.has(type),
+                // Playlist co the rat cham -> cho timeout dai hon.
+                PLAYLIST_TIMEOUT_MS
+            );
+
+    } catch (error) {
+
+        // Nguon loi (502/timeout...) nhung da co cache cu -> dung cache cu
+        // (stale-while-error) thay vi tra 500, tranh lam hong trai nghiem.
+        if (cache[type].data) {
+
+            console.warn(
+                "PLAYLIST LOI, DUNG CACHE CU:",
+                type,
+                error.message
+            );
+
+            return cache[type].data;
+        }
+
+        // Ghi moc loi -> negative cache cho cac request sau.
+        cache[type].failTime = Date.now();
+
+        throw error;
+    }
 
     const contentType = String(
         response.headers.get("content-type") || ""
@@ -2279,6 +2358,22 @@ async function fetchPlaylist(
 
     if (!response.ok) {
         await response.body?.cancel();
+
+        // Tuong tu: neu co cache cu thi dung thay vi bao loi.
+        if (cache[type].data) {
+
+            console.warn(
+                "PLAYLIST HTTP " +
+                response.status +
+                ", DUNG CACHE CU:",
+                type
+            );
+
+            return cache[type].data;
+        }
+
+        // Ghi moc loi -> negative cache cho cac request sau.
+        cache[type].failTime = Date.now();
 
         throw new Error(
             `Playlist HTTP ${response.status}`
@@ -2714,8 +2809,14 @@ app.get(
                     const channel of channels
                 ) {
 
+                    // Chi hien tran hom nay: bo tran da qua (qua cu) va
+                    // tran ngay mai tro di (giam so the -> load nhe hon).
                     if (
                         isMatchExpired(
+                            channel.name,
+                            nowVN
+                        ) ||
+                        isMatchNotToday(
                             channel.name,
                             nowVN
                         )
@@ -2751,8 +2852,12 @@ app.get(
                                 name:
                                     site,
 
+                                // Không mặc định logo website
+                                // = logo đội bóng đầu tiên;
+                                // để trống nếu site
+                                // không có logo riêng.
                                 logo:
-                                    channel.logo ||
+                                    KNOWN_SITE_LOGOS[site] ||
                                     "",
 
                                 matches:
@@ -2764,13 +2869,16 @@ app.get(
                     const siteEntry =
                         siteMap.get(site);
 
+                    // Chỉ dùng logo định sẵn cho
+                    // từng website, không lấy logo
+                    // đội bóng làm logo website.
                     if (
                         !siteEntry.logo &&
-                        channel.logo
+                        KNOWN_SITE_LOGOS[site]
                     ) {
 
                         siteEntry.logo =
-                            channel.logo;
+                            KNOWN_SITE_LOGOS[site];
                     }
 
                     if (

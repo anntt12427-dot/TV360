@@ -54,13 +54,21 @@ function flattenVnFootball(payload) {
     return out;
 }
 
-async function resolveOne(channel) {
+async function resolveOne(channel, attempt = 1) {
     const path = "/api/resolve?url=" + encodeURIComponent(channel.url);
     try {
         const r = await getJson(path);
+
         if (r.ok && r.json && r.json.ok) {
             return { ok: true, kind: r.json.kind, contentType: r.json.contentType };
         }
+
+        // 429 = bi rate limit -> cho roi thu lai (khong tinh la loi that).
+        if (r.status === 429 && attempt < 5) {
+            await new Promise(x => setTimeout(x, 1500 * attempt));
+            return resolveOne(channel, attempt + 1);
+        }
+
         return {
             ok: false,
             status: r.status,
@@ -72,31 +80,28 @@ async function resolveOne(channel) {
     }
 }
 
-// Chạy tuần tự theo batch để không làm nghẽn server (rate limit).
-async function scan(label, channels, concurrency = 2) {
-    console.log(`\n===== SCAN ${label}: ${channels.length} kênh =====`);
+// Do TUAN TU voi delay nho: tranh rate-limit 120 req/phut cua server.
+async function scan(label, channels, skipped = 0) {
     const bad = [];
-    let done = 0;
-    let index = 0;
+    let done = skipped;
 
-    async function worker() {
-        while (index < channels.length) {
-            const i = index++;
-            const ch = channels[i];
-            const r = await resolveOne(ch);
-            done++;
-            if (!r.ok) {
-                bad.push({ ...ch, ...r });
-                console.log(`[FAIL] ${ch.name} | ${ch.group} | ${r.error}${r.kind ? " (" + r.kind + ")" : ""}`);
-            } else {
-                console.log(`[OK]   ${ch.name} | ${ch.group} | ${r.kind}`);
-            }
+    for (const ch of channels) {
+        const r = await resolveOne(ch);
+        done++;
+
+        if (!r.ok) {
+            bad.push({ ...ch, ...r });
         }
+
+        if (done % 50 === 0) {
+            console.log(`  ...${label}: ${done}/${skipped + channels.length} (loi: ${bad.length})`);
+        }
+
+        // Delay nho de khong vuot 120 req/phut.
+        await new Promise(x => setTimeout(x, 550));
     }
 
-    await Promise.all(Array.from({ length: concurrency }, worker));
-
-    console.log(`\n----- ${label}: ${done} kênh, ${bad.length} kênh LỖI -----`);
+    console.log(`----- ${label}: ${done} kênh, ${bad.length} kênh LỖI -----`);
     return bad;
 }
 
@@ -115,19 +120,43 @@ async function main() {
     const vn = vnRes.json ? flattenVnFootball(vnRes.json) : [];
     console.log(`VN football streams: ${vn.length}`);
 
-    const badTv = await scan("TV", tv);
+    console.log("\n===== SCAN TV =====");
+    const skipTv = Number(process.env.SKIP_TV) || 0;
+    const badTv = await scan("TV", tv.slice(skipTv), skipTv);
+    console.log("\n===== SCAN FOOTBALL =====");
     const badFb = await scan("FOOTBALL", fb);
+    console.log("\n===== SCAN VN FOOTBALL =====");
     const badVn = await scan("VN FOOTBALL", vn);
 
+    function summarize(label, bad, total) {
+        console.log(`\n### ${label}: ${total - bad.length}/${total} OK (${bad.length} loi)`);
+
+        const byErr = new Map();
+        for (const b of bad) {
+            const key = String(b.error || "?").slice(0, 60);
+            byErr.set(key, (byErr.get(key) || 0) + 1);
+        }
+
+        // Nhom loi pho bien
+        for (const [err, count] of [...byErr.entries()].sort((a,b)=>b[1]-a[1])) {
+            console.log(`   [${count}] ${err}`);
+        }
+
+        // Liet ke ten kenh loi (toi da 40)
+        for (const b of bad.slice(0, 40)) {
+            console.log(`   - ${b.name} (${b.group}) -> ${b.error}`);
+        }
+        if (bad.length > 40) {
+            console.log(`   ... va ${bad.length - 40} kenh nua`);
+        }
+    }
+
     console.log("\n========================================");
-    console.log("TỔNG HỢP KÊNH LỖI");
+    console.log("TỔNG HỢP");
     console.log("========================================");
-    console.log(`TV: ${badTv.length}/${tv.length}`);
-    for (const b of badTv) console.log(`  - ${b.name} (${b.group}) -> ${b.error}`);
-    console.log(`FOOTBALL: ${badFb.length}/${fb.length}`);
-    for (const b of badFb) console.log(`  - ${b.name} (${b.group}) -> ${b.error}`);
-    console.log(`VN FOOTBALL: ${badVn.length}/${vn.length}`);
-    for (const b of badVn) console.log(`  - ${b.name} (${b.group}) -> ${b.error}`);
+    summarize("TV", badTv, tv.length);
+    summarize("FOOTBALL", badFb, fb.length);
+    summarize("VN FOOTBALL", badVn, vn.length);
 }
 
 main().catch(e => { console.error("SCAN ERROR:", e); process.exit(1); });

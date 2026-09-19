@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -571,12 +571,64 @@ body {
     border-radius: 6px;
 }
 
-
-.channel-name {
-
-    font-size: 13px;
+/* Badge chu cai dau cho site khong co logo rieng */
+.logo-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+    font-size: 17px;
+    color: #fff;
+    background: linear-gradient(135deg, #d32f2f, #8b0000);
 }
 
+
+.channel-name {
+    font-size: 13px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* =====================================================
+   SKELETON (dang tai)
+===================================================== */
+
+.skeleton {
+    pointer-events: none;
+}
+
+.sk-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    background: #262626;
+    animation: sk-pulse 1.4s ease-in-out infinite;
+}
+
+.sk-line {
+    height: 13px;
+    flex: 1;
+    max-width: 60%;
+    border-radius: 4px;
+    background: #262626;
+    animation: sk-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .45;
+    }
+}
 
 /* =====================================================
    RIGHT
@@ -1029,10 +1081,24 @@ video {
     .left {
         order: 2;
         width: 100%;
-        max-height: none;
+        /* Khung danh sach co dinh chieu cao: cuộn bên trong khung,
+           trang không dài quá vài trăm kênh. */
+        height: calc(100vh - 60px);
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
         border-right: 0;
         border-top: 1px solid #303030;
         padding: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .left::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .left::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 10px;
     }
 
     .groups {
@@ -1052,6 +1118,11 @@ video {
     .match, .channel {
         padding: 14px 12px;
         min-height: 56px;
+    }
+
+    /* Danh sách nằm trong khung cuộn riêng, sticky không cần nữa */
+    .player-box {
+        position: static;
     }
 
     .match-name {
@@ -1408,6 +1479,13 @@ let footballRefreshTimer = null;
 const streamCache = new Map();
 
 const STREAM_CACHE_TIME = 2 * 60 * 1000;
+
+// Cache du lieu playlist theo mode o phia client.
+// Muc dich: khi nguoi dung bam qua lai giua 3 tab, khong goi lai
+// /api/channels lien tuc -> giam tai nguon & tang toc do.
+const playlistCache = new Map();
+
+const PLAYLIST_CACHE_TIME = 15 * 60 * 1000;
 
 
 // =====================================================
@@ -2279,7 +2357,8 @@ async function switchMode(
 
                     try {
 
-                        await loadData();
+                        // Refresh dinh ky -> force bo qua cache client.
+                        await loadData(true);
 
                     } catch (e) {
 
@@ -2297,19 +2376,29 @@ async function switchMode(
 // LOAD DATA
 // =====================================================
 
-async function loadData() {
+async function loadData(force = false) {
 
+    // ==================================================
+    // CACHE PHIA CLIENT: bam qua lai giua cac tab khong goi lai API.
+    // ==================================================
+    const cacheKey = mode;
+    const cached = playlistCache.get(cacheKey);
+
+    if (
+        !force &&
+        cached &&
+        Date.now() - cached.time < PLAYLIST_CACHE_TIME
+    ) {
+        applyData(cached.data);
+        return;
+    }
+
+    // Skeleton: hien ngay cac the xam gia thay vi cho trang.
     list.innerHTML =
-        `
-        <div class="empty">
-            Đang tải playlist...
-        </div>
-        `;
-
+        skeletonCards(8);
 
     groups.innerHTML =
         "";
-
 
     try {
 
@@ -2319,14 +2408,14 @@ async function loadData() {
 
         for (let attempt = 1; attempt <= 3; attempt++) {
             try {
+                // Bo cache-bust: de trinh duyet/cache dung du lieu cu,
+                // giam request len nguon.
                 const response =
                     await fetch(
                         "/api/channels?type=" +
                         encodeURIComponent(
                             mode
-                        ) +
-                        "&t=" +
-                        Date.now()
+                        )
                     );
 
                 if (!response.ok) {
@@ -2363,44 +2452,22 @@ async function loadData() {
         }
 
         if (lastError || !data) {
+            // Neu mang loi nhung co cache cu -> dung cache cu.
+            if (cached) {
+                applyData(cached.data);
+                return;
+            }
+
             throw lastError || new Error("Không tải được playlist");
         }
 
+        playlistCache.set(cacheKey, {
+            time: Date.now(),
+            data
+        });
 
-        if (
-            mode === "football"
-        ) {
 
-            allData =
-                data.groups ||
-                [];
-
-            renderFootball();
-
-        } else if (
-            mode === "vnfootball"
-        ) {
-
-            vnSites =
-                data.sites ||
-                [];
-
-            footballFilters.style.display =
-                "none";
-
-            renderVnFootball();
-
-        } else {
-
-            allData =
-                data.channels ||
-                [];
-
-            footballFilters.style.display =
-                "none";
-
-            renderTV();
-        }
+        applyData(data);
 
     } catch (err) {
 
@@ -2419,16 +2486,50 @@ async function loadData() {
                     err.message
                 )}
             </div>
-            `;
-    }
-}
+                        `;
+                }
+            }
 
+            // Ap dung du lieu da tai (tu fetch hoac tu cache client) vao UI.
+            function applyData(data) {
 
-// =====================================================
-// FOOTBALL
-// =====================================================
+                if (mode === "football") {
 
-function renderFootball() {
+                    allData =
+                        data.groups ||
+                        [];
+
+                    renderFootball();
+
+                } else if (mode === "vnfootball") {
+
+                    vnSites =
+                        data.sites ||
+                        [];
+
+                    footballFilters.style.display =
+                        "none";
+
+                    renderVnFootball();
+
+                } else {
+
+                    allData =
+                        data.channels ||
+                        [];
+
+                    footballFilters.style.display =
+                        "none";
+
+                    renderTV();
+                }
+            }
+
+            // =====================================================
+            // FOOTBALL
+            // =====================================================
+
+            function renderFootball() {
 
     footballFilters.style.display =
         "flex";
@@ -3737,7 +3838,7 @@ function renderVnFootball() {
         list.innerHTML =
             `
             <div class="empty">
-                🇻🇳 Không có trận nào trong khoảng ±3 giờ
+                🇻🇳 Hôm nay không có trận nào phù hợp
             </div>
             `;
 
@@ -3795,22 +3896,35 @@ function renderVnFootball() {
         if (
             site.logo
         ) {
-
             const img =
                 document.createElement(
                     "img"
                 );
-
             img.className =
                 "logo";
-
             setupLogoImg(
                 img,
                 site.logo
             );
-
             card.appendChild(
                 img
+            );
+        } else {
+            // Site khong co logo rieng (Vua San Co, Khan Dai...):
+            // ve badge chu cai dau thay vi lay logo doi bong.
+            const badge =
+                document.createElement(
+                    "div"
+                );
+            badge.className =
+                "logo logo-badge";
+            badge.textContent =
+                (site.name || "?")
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase();
+            card.appendChild(
+                badge
             );
         }
 
@@ -3926,139 +4040,138 @@ function renderVnMatchList() {
         return;
     }
 
-    for (
-        const match
-        of matches
-    ) {
+    renderChunked(
+        matches,
+        match => {
 
-        const box =
-            document.createElement(
-                "div"
-            );
-
-        box.className =
-            "vn-match-card";
-
-        // Logo (doi bong) ben trai
-        if (
-            match.logo
-        ) {
-
-            const img =
+            const box =
                 document.createElement(
-                    "img"
+                    "div"
                 );
 
-            img.className =
-                "vn-match-logo";
+            box.className =
+                "vn-match-card";
 
-            setupLogoImg(
-                img,
+            // Logo (doi bong) ben trai
+            if (
                 match.logo
+            ) {
+
+                const img =
+                    document.createElement(
+                        "img"
+                    );
+
+                img.className =
+                    "vn-match-logo";
+
+                setupLogoImg(
+                    img,
+                    match.logo
+                );
+
+                box.appendChild(
+                    img
+                );
+            }
+
+            const body =
+                document.createElement(
+                    "div"
+                );
+
+            body.className =
+                "vn-match-body";
+
+            const head =
+                document.createElement(
+                    "div"
+                );
+
+            head.className =
+                "vn-match-head";
+
+            const timeEl =
+                document.createElement(
+                    "span"
+                );
+
+            timeEl.className =
+                "vn-match-time";
+
+            timeEl.textContent =
+                match.time ||
+                "LIVE";
+
+            head.appendChild(
+                timeEl
+            );
+
+            const liveEl =
+                document.createElement(
+                    "span"
+                );
+
+            liveEl.className =
+                "live-badge";
+
+            liveEl.innerHTML =
+                '<span class="live-dot"></span>LIVE';
+
+            head.appendChild(
+                liveEl
+            );
+
+            body.appendChild(
+                head
+            );
+
+            const titleEl =
+                document.createElement(
+                    "div"
+                );
+
+            titleEl.className =
+                "vn-match-title";
+
+            titleEl.textContent =
+                match.title ||
+                "Trận đấu";
+
+            body.appendChild(
+                titleEl
+            );
+
+            const foot =
+                document.createElement(
+                    "div"
+                );
+
+            foot.className =
+                "vn-match-foot";
+
+            foot.textContent =
+                match.streams.length +
+                " luồng  •  ▶ XEM";
+
+            body.appendChild(
+                foot
             );
 
             box.appendChild(
-                img
-            );
-        }
-
-        const body =
-            document.createElement(
-                "div"
+                body
             );
 
-        body.className =
-            "vn-match-body";
+            box.onclick =
+                () =>
+                    playVnMatch(
+                        match
+                    );
 
-        const head =
-            document.createElement(
-                "div"
-            );
-
-        head.className =
-            "vn-match-head";
-
-        const timeEl =
-            document.createElement(
-                "span"
-            );
-
-        timeEl.className =
-            "vn-match-time";
-
-        timeEl.textContent =
-            match.time ||
-            "LIVE";
-
-        head.appendChild(
-            timeEl
-        );
-
-        const liveEl =
-            document.createElement(
-                "span"
-            );
-
-        liveEl.className =
-            "live-badge";
-
-        liveEl.innerHTML =
-            '<span class="live-dot"></span>LIVE';
-
-        head.appendChild(
-            liveEl
-        );
-
-        body.appendChild(
-            head
-        );
-
-        const titleEl =
-            document.createElement(
-                "div"
-            );
-
-        titleEl.className =
-            "vn-match-title";
-
-        titleEl.textContent =
-            match.title ||
-            "Trận đấu";
-
-        body.appendChild(
-            titleEl
-        );
-
-        const foot =
-            document.createElement(
-                "div"
-            );
-
-        foot.className =
-            "vn-match-foot";
-
-        foot.textContent =
-            match.streams.length +
-            " luồng  •  ▶ XEM";
-
-        body.appendChild(
-            foot
-        );
-
-        box.appendChild(
-            body
-        );
-
-        box.onclick =
-            () =>
-                playVnMatch(
-                    match
-                );
-
-        list.appendChild(
-            box
-        );
-    }
+            return box;
+        },
+        list
+    );
 }
 
 // =====================================================
@@ -4260,84 +4373,13 @@ function renderTV() {
     const filtered =
         allData.slice();
 
-
     renderTVGroups(
         filtered
     );
 
-
-    list.innerHTML =
-        "";
-
-
-    for (
-        const channel
-        of filtered
-    ) {
-
-        const div =
-            document.createElement(
-                "div"
-            );
-
-
-        div.className =
-            "channel";
-
-
-        if (
-            channel.logo
-        ) {
-
-                const img =
-                    document.createElement(
-                        "img"
-                    );
-
-                img.className =
-                    "logo";
-
-                setupLogoImg(
-                    img,
-                    channel.logo
-                );
-
-                div.appendChild(
-                    img
-                );
-            }
-
-
-        const name =
-            document.createElement(
-                "div"
-            );
-
-
-        name.className =
-            "channel-name";
-
-
-        name.textContent =
-            channel.name;
-
-
-        div.appendChild(
-            name
-        );
-
-
-        div.onclick =
-            () =>
-                playTV(
-                    channel
-                );
-
-
-        list.appendChild(
-            div
-        );
-    }
+    renderTVList(
+        filtered
+    );
 }
 
 
@@ -4415,31 +4457,26 @@ function renderTVList(
     list.innerHTML =
         "";
 
+    renderChunked(
+        channels,
+        channel => {
 
-    for (
-        const channel
-        of channels
-    ) {
-
-        const div =
-            document.createElement(
-                "div"
-            );
-
-
-        div.className =
-            "channel";
-
-
-        if (
-            channel.logo
-        ) {
-
-            const img =
+            const div =
                 document.createElement(
-                    "img"
+                    "div"
                 );
 
+            div.className =
+                "channel";
+
+            if (
+                channel.logo
+            ) {
+
+                const img =
+                    document.createElement(
+                        "img"
+                    );
 
                 img.className =
                     "logo";
@@ -4454,37 +4491,31 @@ function renderTVList(
                 );
             }
 
-
-        const name =
-            document.createElement(
-                "div"
-            );
-
-
-        name.className =
-            "channel-name";
-
-
-        name.textContent =
-            channel.name;
-
-
-        div.appendChild(
-            name
-        );
-
-
-        div.onclick =
-            () =>
-                playTV(
-                    channel
+            const name =
+                document.createElement(
+                    "div"
                 );
 
+            name.className =
+                "channel-name";
 
-        list.appendChild(
-            div
-        );
-    }
+            name.textContent =
+                channel.name;
+
+            div.appendChild(
+                name
+            );
+
+            div.onclick =
+                () =>
+                    playTV(
+                        channel
+                    );
+
+            return div;
+        },
+        list
+    );
 }
 
 
@@ -4881,6 +4912,72 @@ function isHLS(
 // lazy + no-referrer: tranh logo ben ngoai chan load/chan render,
 // va tu an khi loi (nhieu logo nguon khong cho hot-link).
 
+// =====================================================
+// RENDER THEO LO (CHUNKED)
+// =====================================================
+// Chen tung lo phan tu vao container thay vi chen het mot lan.
+// Voi 500+ kenh, chen het mot lan se block UI vai giay -> treo.
+// Dung requestAnimationFrame giua cac lo de giu UI muot.
+
+const RENDER_CHUNK_SIZE = 40;
+
+function renderChunked(items, createElement, container) {
+
+    let index = 0;
+
+    // Huy render cu neu nguoi dung doi tab giua chung.
+    const token = ++renderChunked.token;
+
+    function step() {
+
+        if (token !== renderChunked.token) {
+            return;
+        }
+
+        const end = Math.min(
+            index + RENDER_CHUNK_SIZE,
+            items.length
+        );
+
+        const frag = document.createDocumentFragment();
+
+        for (; index < end; index++) {
+
+            const el = createElement(items[index], index);
+
+            if (el) {
+                frag.appendChild(el);
+            }
+        }
+
+        container.appendChild(frag);
+
+        if (index < items.length) {
+            requestAnimationFrame(step);
+        }
+    }
+
+    requestAnimationFrame(step);
+}
+
+renderChunked.token = 0;
+
+// Skeleton card (the xam gia) hien khi dang tai.
+function skeletonCards(count = 8) {
+
+    let html = "";
+
+    for (let i = 0; i < count; i++) {
+        html +=
+            '<div class="channel skeleton">' +
+            '<div class="sk-logo"></div>' +
+            '<div class="sk-line"></div>' +
+            '</div>';
+    }
+
+    return html;
+}
+
 function setupLogoImg(img, src) {
 
     img.loading = "lazy";
@@ -4969,7 +5066,8 @@ function escapeHtml(
 
                 try {
 
-                    await loadData();
+                    // Refresh dinh ky -> force bo qua cache client.
+                    await loadData(true);
 
                 } catch (e) {
 

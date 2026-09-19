@@ -1,0 +1,171 @@
+Bắt đầu dò kênh...
+TV channels: 501
+Football channels: 131
+VN football streams: 391
+
+===== SCAN TV =====
+  ...TV: 50/501 (loi: 7)
+  ...TV: 100/501 (loi: 13)
+  ...TV: 150/501 (loi: 15)
+  ...TV: 200/501 (loi: 18)
+  ...TV: 250/501 (loi: 19)
+  ...TV: 300/501 (loi: 19)
+  ...TV: 350/501 (loi: 37)
+  ...TV: 400/501 (loi: 50)
+  ...TV: 450/501 (loi: 100)
+  ...TV: 500/501 (loi: 147)
+----- TV: 501 kênh, 148 kênh LỖI -----
+
+===== SCAN FOOTBALL =====
+  ...FOOTBALL: 50/131 (loi: 50)
+  ...FOOTBALL: 100/131 (loi: 100)
+----- FOOTBALL: 131 kênh, 131 kênh LỖI -----
+
+===== SCAN VN FOOTBALL =====
+  ...VN FOOTBALL: 50/391 (loi: 50)
+  ...VN FOOTBALL: 100/391 (loi: 100)
+  ...VN FOOTBALL: 150/391 (loi: 150)
+  ...VN FOOTBALL: 200/391 (loi: 200)
+  ...VN FOOTBALL: 250/391 (loi: 250)
+  ...VN FOOTBALL: 300/391 (loi: 300)
+  ...VN FOOTBALL: 350/391 (loi: 350)
+----- VN FOOTBALL: 391 kênh, 389 kênh LỖI -----
+
+========================================
+TỔNG HỢP
+========================================
+
+### TV: 353/501 OK (148 loi)
+   [79] fetch failed
+   [60] Nguồn TV không trả về luồng phát hợp lệ
+   [9] This operation was aborted
+   - CANAL+ LIVE 2 (⚽| Thể thao quốc tế) -> Nguồn TV không trả về luồng phát hợp lệ
+   - CANAL+ LIVE 8 (⚽| Thể thao quốc tế) -> Nguồn TV không trả về luồng phát hợp lệ
+   - CANAL+ LIVE 9 (⚽| Thể thao quốc tế) -> Nguồn TV không trả về luồng phát hợp lệ
+   - CANAL+ LIVE 10 (⚽| Thể thao quốc tế) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Mưa Đỏ (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Mang Mẹ Đi Bỏ (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Làm Giàu Với Ma Phần 2: Cuộc Chiến Hột Xoàn (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Tay Anh Giữ Một Vì Sao (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Út Lan: Oán Linh Giữ Của (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Nhà Mình Đi Thôi (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Oshi No Ko Phần 3 - Tập 6 (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Oshi No Ko Phần 3 - Tập 8 (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Oshi No Ko Phần 3 - Tập 9 (LIVE EVENTS 🔴) -> Nguồn TV không trả về luồng phát hợp lệ
+   - 360 C1 Châu Âu (Thể Thao) -> Nguồn TV không trả về luồng phát hợp lệ
+   - 360 C2 Châu Âu (Thể Thao) -> Nguồn TV không trả về luồng phát hợp lệ
+   - ON Info TV (VTVcab) -> Nguồn TV không trả về luồng phát hợp lệ
+   - ON TRENDING TV (VTVcab) -> Nguồn TV không trả về luồng phát hợp lệ
+   - SCTV8 (SCTV) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Huế TV - Báo và PTTH Huế (Địa phương) -> Nguồn TV không trả về luồng phát hợp lệ
+   - ABC Australia (Quốc Tế) -> This operation was aborted
+   - HGTV (Quốc Tế) -> Nguồn TV không trả về luồng phát hợp lệ
+   - VOV1 (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - VOV2 (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - VOV3 (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Cần Thơ Radio 1 (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Đồng Nai (Radio) -> This operation was aborted
+   - Đồng Tháp (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Hà Tĩnh (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - An Giang FM 99,4 Mhz (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - M Radio Việt Nam (Radio) -> Nguồn TV không trả về luồng phát hợp lệ
+   - Cải Lương Việt Nam (Radio) -> This operation was aborted
+   - Radio Nhạc Vàng Xưa () -> This operation was aborted
+   - Radio DJ (Radio) -> This operation was aborted
+   - Radio Phật Giáo (Radio) -> This operation was aborted
+   - Radio Nhạc Dân Ca (Radio) -> This operation was aborted
+   - Heart FM UK (🇬🇧 UK Radio) -> This operation was aborted
+   - Capital Radio UK (🇬🇧 UK Radio) -> This operation was aborted
+   - JTV SBS (🇰🇷| Hàn Quốc) -> Nguồn TV không trả về luồng phát hợp lệ
+   - MBC Daegu (🇰🇷| Hàn Quốc) -> Nguồn TV không trả về luồng phát hợp lệ
+   - MBC Yeosu (🇰🇷| Hàn Quốc) -> Nguồn TV không trả về luồng phát hợp lệ
+   ... va 108 kenh nua
+
+### FOOTBALL: 0/131 OK (131 loi)
+   [131] fetch failed
+   - ASIAN GAMES 1 (ASIAN GAMES 2026) -> fetch failed
+   - ASIAN GAMES 2 (ASIAN GAMES 2026) -> fetch failed
+   - ASIAN GAMES 3 (ASIAN GAMES 2026) -> fetch failed
+   - ASIAN GAMES 4 (ASIAN GAMES 2026) -> fetch failed
+   - ASIAN GAMES 5 (ASIAN GAMES 2026) -> fetch failed
+   - ASIAN GAMES 6 (ASIAN GAMES 2026) -> fetch failed
+   - SPORT 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - SPORT 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - NOVA SPORT 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - NOVA SPORT 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - BEINSPORTS 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - BEINSPORTS 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - BEINSPORTS 3 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - DSPORTS 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - DSPORTS 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - DSPORTS PLUS (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - CAZETV 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - CAZETV 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - CBS SPORT CHAMPIONLEAGUE (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - CBS SPORT GOLAZO (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - CBS SPORT HQ (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - SPORTV 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - SPORTV 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - SPORTV 3 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - EUROVISION SPORT (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - EURO SPORT 1 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - EURO SPORT 2 (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - F1 TV (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - MOTO GP (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - FIFA+ (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - FIFA+ (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - NBA (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - UFC (WORLD SPORTS 1 <MPD>) -> fetch failed
+   - SKYSPORT EPL (WORLD SPORTS 2) -> fetch failed
+   - SKYSPORT TOP EVENT (WORLD SPORTS 2) -> fetch failed
+   - SKYSPORT  F1 (WORLD SPORTS 2) -> fetch failed
+   - SKYSPORT TENNIS (WORLD SPORTS 2) -> fetch failed
+   - SKYSPORT MIX (WORLD SPORTS 2) -> fetch failed
+   - DAZN1 DE (WORLD SPORTS 2) -> fetch failed
+   - DAZN2 DE (WORLD SPORTS 2) -> fetch failed
+   ... va 91 kenh nua
+
+### VN FOOTBALL: 2/391 OK (389 loi)
+   [363] fetch failed
+   [26] Nguồn TV không trả về luồng phát hợp lệ
+   - Dong Tam Long An vs Bac Ninh (Lê Hoàn) (Vua Sân Cỏ TV) -> fetch failed
+   - Avispa Fukuoka vs Sanfrecce Hiroshima (Doanh Chính) (Vua Sân Cỏ TV) -> fetch failed
+   - CLB Thanh Hoa vs Becamex Ho Chi Minh City (Trần Hoàng) (Vua Sân Cỏ TV) -> fetch failed
+   - Khatoco Khanh Hoa vs Van Hien University (Tào Duệ) (Vua Sân Cỏ TV) -> fetch failed
+   - Tottenham Hotspur vs Aston Villa (Ngô Quyền) (Vua Sân Cỏ TV) -> fetch failed
+   - Stoke City vs Sheffield United (Trần Cảnh) (Vua Sân Cỏ TV) -> fetch failed
+   - Cardiff City vs Charlton Athletic (Nguyễn Ánh) (Vua Sân Cỏ TV) -> fetch failed
+   - CA Osasuna vs Rayo Vallecano (Lê Hoàn) (Vua Sân Cỏ TV) -> fetch failed
+   - Udinese vs Cagliari (Tào Duệ) (Vua Sân Cỏ TV) -> fetch failed
+   - Bologna vs Torino (Triệu Hằng) (Vua Sân Cỏ TV) -> fetch failed
+   - Borussia Monchengladbach vs 1. FSV Mainz 05 (Tôn Quyền) (Vua Sân Cỏ TV) -> fetch failed
+   - Eintracht Frankfurt vs SC Freiburg (Trần Hoàng) (Vua Sân Cỏ TV) -> fetch failed
+   - Brighton Hove Albion vs Arsenal (Lưu Bang) (Vua Sân Cỏ TV) -> fetch failed
+   - Newcastle United vs Hull City (Trần Cảnh) (Vua Sân Cỏ TV) -> fetch failed
+   - Athletic Club vs Deportivo Alavés (Nguyễn Ánh) (Vua Sân Cỏ TV) -> fetch failed
+   - Paris FC vs RC Strasbourg Alsace (Triệu Hằng) (Vua Sân Cỏ TV) -> fetch failed
+   - AS Roma vs Inter Milan (Ngô Quyền) (Vua Sân Cỏ TV) -> fetch failed
+   - Nottingham Forest vs Coventry City (Lưu Bang) (Vua Sân Cỏ TV) -> fetch failed
+   - RC Celta vs Racing Santander (Tôn Quyền) (Vua Sân Cỏ TV) -> fetch failed
+   - Kawasaki Frontale vs Kashima Antlers (Tiểu Mây) (Khán Đài TV) -> fetch failed
+   - Urawa Reds vs Verdy (Tày) (Khán Đài TV) -> fetch failed
+   - Thanh Hoá vs Becamex TP Hồ Chí Minh (Pháo Thủ) (Khán Đài TV) -> fetch failed
+   - Tottenham vs Aston Villa (Lee Sin) (Khán Đài TV) -> fetch failed
+   - Osasuna vs Rayo Vallecano (Người Kiến) (Khán Đài TV) -> fetch failed
+   - Bologna vs Torino (Tiểu Mây) (Khán Đài TV) -> fetch failed
+   - Ba Lan vs Latvia (KaKa) (Khán Đài TV) -> fetch failed
+   - Eintracht Frankfurt vs Freiburg (Enzo) (Khán Đài TV) -> fetch failed
+   - Werder Bremen vs Augsburg (Pháo Thủ) (Khán Đài TV) -> fetch failed
+   - Brighton vs Arsenal (Lee Sin) (Khán Đài TV) -> fetch failed
+   - Everton vs Ipswich (Tày) (Khán Đài TV) -> fetch failed
+   - Newcastle vs Hull City (Người Kiến) (Khán Đài TV) -> fetch failed
+   - Ath Bilbao vs Alaves (Famy) (Khán Đài TV) -> fetch failed
+   - Paris FC vs Strasbourg (Tiểu Mây) (Khán Đài TV) -> fetch failed
+   - AS Roma vs Inter (Pháo Thủ) (Khán Đài TV) -> fetch failed
+   - Đức vs Bulgaria (KaKa) (Khán Đài TV) -> fetch failed
+   - Celta Vigo vs Racing Santander (Enzo) (Khán Đài TV) -> fetch failed
+   - Stuttgart vs Dortmund (Người Kiến) (Khán Đài TV) -> fetch failed
+   - Nottingham vs Coventry (Tày) (Khán Đài TV) -> fetch failed
+   - Bucheon FC 1995 vs Gimcheon Sangmu FC (Chuối To) (Chuối Chiên TV) -> fetch failed
+   - Long An FC vs Bắc Ninh (Chuối Kem) (Chuối Chiên TV) -> fetch failed
+   ... va 349 kenh nua
