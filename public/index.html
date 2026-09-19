@@ -713,15 +713,155 @@ video {
     pointer-events: none;
 }
 
-.progress-track {
+/* Thanh tua: khung .progress-bar giu vi tri + ve nen/fill, input range
+   nam tren cung de nhan thao tac keo (vung cham cao 22-28px). */
+.progress-bar {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
 
     width: 100%;
 
-    height: 4px;
+    height: 22px;
+
+    touch-action: none;
+}
+
+/* Nen thanh tua (phan chua phat) */
+.progress-bar::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+
+    right: 0;
+
+    left: 0;
+
+    height: 5px;
+
+    border-radius: 3px;
+
+    transform: translateY(-50%);
+
+    background: rgba(255, 255, 255, .25);
+
+    pointer-events: none;
+}
+
+/* Phan da phat */
+.progress-fill {
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 0;
+
+    width: 0;
+
+    height: 5px;
+
+    border-radius: 3px;
+
+    transform: translateY(-50%);
+
+    background: #e50914;
+
+    pointer-events: none;
+
+    transition: width .2s linear;
+}
+
+/* Live khong co cua so tua (DVR) -> thanh tua mo di */
+.progress-bar.disabled .progress-fill {
+
+    background: #777;
+}
+
+.progress-track {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 22px;
+
+    margin: 0;
+
+    background: transparent;
+
+    -webkit-appearance: none;
+
+    appearance: none;
 
     accent-color: #e50914;
 
     cursor: pointer;
+
+    touch-action: none;
+}
+
+.progress-track:disabled {
+
+    cursor: default;
+}
+
+.progress-track::-webkit-slider-runnable-track {
+
+    height: 22px;
+
+    background: transparent;
+}
+
+.progress-track::-webkit-slider-thumb {
+
+    width: 16px;
+
+    height: 16px;
+
+    margin-top: 3px;
+
+    border: 2px solid #fff;
+
+    border-radius: 50%;
+
+    background: #e50914;
+
+    box-shadow: 0 0 5px rgba(0, 0, 0, .7);
+
+    -webkit-appearance: none;
+
+    appearance: none;
+}
+
+.progress-track::-moz-range-track {
+
+    height: 22px;
+
+    border: 0;
+
+    background: transparent;
+}
+
+.progress-track::-moz-range-thumb {
+
+    width: 12px;
+
+    height: 12px;
+
+    border: 2px solid #fff;
+
+    border-radius: 50%;
+
+    background: #e50914;
+
+    box-shadow: 0 0 5px rgba(0, 0, 0, .7);
 }
 
 .control-row {
@@ -807,6 +947,30 @@ video {
     color: #ff5360;
 
     font-weight: 700;
+}
+
+
+/* Toan man hinh: khung player phu kin man hinh, bo gioi han 16/9 */
+.player-box:fullscreen {
+
+    width: 100vw;
+
+    height: 100vh;
+
+    max-height: none;
+
+    aspect-ratio: auto;
+}
+
+.player-box:-webkit-full-screen {
+
+    width: 100vw;
+
+    height: 100vh;
+
+    max-height: none;
+
+    aspect-ratio: auto;
 }
 
 
@@ -1039,43 +1203,91 @@ video {
     .player-box {
         max-height: none;
         aspect-ratio: 16 / 9;
-        position: sticky;
-        top: 56px;
         z-index: 9;
         background: #000;
     }
 
     .player-actions {
-        padding: 20px 8px 8px;
+        padding: 16px 8px 8px;
     }
 
+    /* Mot hang duy nhat, khong wrap: thanh tua luon nam ngay tren cum nut
+       trong khung player. Cac nut it dung (toc do/chat luong) nam cuoi
+       hang, keo ngang de xem. */
     .control-row {
         gap: 6px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
     }
+
+    .control-row::-webkit-scrollbar {
+        display: none;
+    }
+
+    .control-row > * {
+        flex-shrink: 0;
+    }
+
+    /* Uu tien: nut chinh luon hien truoc, khong can keo ngang */
+    #playButton { order: 1; }
+    #rewindButton { order: 2; }
+    #forwardButton { order: 3; }
+    #timeLabel { order: 4; }
+    .control-row > .control-spacer { order: 5; flex: 1 1 0; }
+    #muteButton { order: 6; }
+    #liveButton { order: 7; }
+    #fullscreenButton { order: 8; }
+    #speedSelect { order: 9; }
+    #qualitySelect { order: 10; }
 
     .player-action,
     .speed-select,
     .quality-select {
         height: 40px;
-        min-width: 44px;
+        min-width: 40px;
         font-size: 13px;
         border-radius: 8px;
     }
 
     .icon-button {
-        width: 44px;
+        width: 40px;
+        min-width: 40px;
         height: 40px;
     }
 
     .quality-select {
-        max-width: none;
-        flex: 1;
-        min-width: 110px;
+        max-width: 96px;
+    }
+
+    /* Vung cham thanh tua cao hon de keo bang ngon tay */
+    .progress-bar {
+        height: 28px;
     }
 
     .progress-track {
-        height: 8px;
+        height: 28px;
+    }
+
+    .progress-track::-webkit-slider-runnable-track {
+        height: 28px;
+    }
+
+    .progress-track::-webkit-slider-thumb {
+        width: 18px;
+        height: 18px;
+        margin-top: 5px;
+    }
+
+    .progress-track::-moz-range-track {
+        height: 28px;
+    }
+
+    .progress-track::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
     }
 
     .left {
@@ -1120,9 +1332,12 @@ video {
         min-height: 56px;
     }
 
-    /* Danh sách nằm trong khung cuộn riêng, sticky không cần nữa */
+    /* Danh sách nằm trong khung cuộn riêng, sticky không cần nữa.
+       Nhung PHAI giu relative: .player-actions (position:absolute) lay
+       .player-box lam goc. Neu de static thi thanh cong cu se "roi"
+       xuong day man hinh, de len danh sach kenh -> bam nham play/tua. */
     .player-box {
-        position: static;
+        position: relative;
     }
 
     .match-name {
@@ -1153,7 +1368,7 @@ video {
     }
 
     .time-label {
-        min-width: 70px;
+        min-width: 64px;
         font-size: 10px;
     }
 
@@ -1168,10 +1383,38 @@ video {
 
 }
 
+/* Man hinh rat nho: thu gon kich thuoc nhung KHONG an nut tua/thanh tua */
 @media(max-width:400px) {
-    .time-label { display: none; }
-    #rewindButton, #forwardButton { display: none; }
-    .control-spacer { display: none; }
+    .player-actions {
+        padding: 14px 6px 6px;
+    }
+
+    .control-row {
+        gap: 4px;
+    }
+
+    .player-action,
+    .speed-select,
+    .quality-select {
+        height: 38px;
+        min-width: 38px;
+        font-size: 12px;
+    }
+
+    .icon-button {
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+    }
+
+    .time-label {
+        min-width: 58px;
+        font-size: 10px;
+    }
+
+    .quality-select {
+        max-width: 88px;
+    }
 }
 
 </style>
@@ -1273,16 +1516,28 @@ video {
 
             <div class="player-actions">
 
-                <input
-                    id="progressTrack"
-                    class="progress-track"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value="0"
-                    step="0.1"
-                    aria-label="Tiến trình phát"
+                <div
+                    id="progressBar"
+                    class="progress-bar"
                 >
+
+                    <div
+                        id="progressFill"
+                        class="progress-fill"
+                    ></div>
+
+                    <input
+                        id="progressTrack"
+                        class="progress-track"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="0"
+                        step="0.1"
+                        aria-label="Tiến trình phát"
+                    >
+
+                </div>
 
                 <div class="control-row">
 
@@ -1582,6 +1837,18 @@ const progressTrack =
     );
 
 
+const progressBar =
+    document.getElementById(
+        "progressBar"
+    );
+
+
+const progressFill =
+    document.getElementById(
+        "progressFill"
+    );
+
+
 const playButton =
     document.getElementById(
         "playButton"
@@ -1707,46 +1974,134 @@ function formatTime(seconds) {
 }
 
 
-// Moc thoi gian 0 cho live DASH: currentTime co the la gia tri tuyet doi
-// rat lon (tinh tu 1970). Lay diem bat dau cua cua so seekable/buffered
-// lam goc de hien thi thoi gian tuong doi.
-function getTimeOrigin() {
+// Cua so tua hien tai. VOD: [0, duration]. Live co DVR:
+// [seekable.start, seekable.end]. Live khong DVR: hai dau bang nhau.
+function getSeekRange() {
+    const duration = video.duration;
+
+    if (Number.isFinite(duration) && duration > 0) {
+        return {
+            start: 0,
+            end: duration,
+            seekable: true
+        };
+    }
+
     try {
         if (video.seekable && video.seekable.length) {
-            return video.seekable.start(0);
-        }
+            const last = video.seekable.length - 1;
+            const start = video.seekable.start(0);
+            const end = video.seekable.end(last);
 
-        if (video.buffered && video.buffered.length) {
-            return video.buffered.start(0);
+            return {
+                start,
+                end,
+                seekable: end - start > 1
+            };
         }
     } catch {}
 
-    return 0;
+    return {
+        start: 0,
+        end: 0,
+        seekable: false
+    };
 }
 
 function updateVideoControls() {
-    const duration = video.duration;
     const current = video.currentTime;
+    const range = getSeekRange();
+    const span = range.end - range.start;
 
-    if (Number.isFinite(duration) && duration > 0) {
-        progressTrack.value =
-            String((current / duration) * 100);
+    if (range.seekable && span > 0) {
+        const percent = Math.min(
+            100,
+            Math.max(0, ((current - range.start) / span) * 100)
+        );
 
-        timeLabel.textContent =
-            formatTime(current) +
-            " / " +
-            formatTime(duration);
+        progressTrack.disabled = false;
+        progressBar.classList.remove("disabled");
+
+        // Dang keo tay thi khong ghi de vi tri nguoi dung dang chon.
+        if (!progressDragging) {
+            progressTrack.value = String(percent);
+        }
+
+        progressFill.style.width = percent + "%";
+
+        if (Number.isFinite(video.duration) && video.duration > 0) {
+            timeLabel.textContent =
+                formatTime(current) +
+                " / " +
+                formatTime(video.duration);
+        } else {
+            // Live: hien thi thoi gian tuong doi tu goc cua so tua.
+            const relCurrent = current - range.start;
+
+            timeLabel.textContent =
+                formatTime(relCurrent > 0 ? relCurrent : 0) + " / LIVE";
+        }
     } else {
-        // Live: hien thi thoi gian tuong doi tu goc thay vi timestamp tuyet doi.
-        const origin = getTimeOrigin();
-        const relCurrent = current - origin;
-
-        timeLabel.textContent =
-            formatTime(relCurrent > 0 ? relCurrent : 0) + " / LIVE";
+        // Live khong co cua so tua (DVR): vo hieu thanh tua, chi hien LIVE.
+        progressTrack.disabled = true;
+        progressBar.classList.add("disabled");
+        progressFill.style.width = "0%";
+        timeLabel.textContent = "LIVE";
     }
 
     playButton.textContent = video.paused ? "▶" : "❚❚";
     muteButton.textContent = video.muted ? "🔇" : "🔊";
+}
+
+
+// Voi live (thoi luong vo han) chi duoc tua TRONG cua so seekable.
+// Dat currentTime ngoai cua so se bi trinh duyet keo moc ve live -> hien
+// tuong video "tu dung"/nhay hinh. Vi vay luon kep moc tua vao cua so hop le.
+function clampToSeekable(time) {
+    try {
+        if (video.seekable && video.seekable.length) {
+            let best = null;
+
+            for (let i = 0; i < video.seekable.length; i++) {
+                const start = video.seekable.start(i);
+                const end = video.seekable.end(i);
+
+                if (time >= start && time <= end) {
+                    return time;
+                }
+
+                if (
+                    best === null ||
+                    Math.abs(start - time) < Math.abs(best - time)
+                ) {
+                    best = start;
+                }
+
+                if (Math.abs(end - time) < Math.abs(best - time)) {
+                    best = end;
+                }
+            }
+
+            if (best !== null) {
+                return best;
+            }
+        }
+    } catch {}
+
+    return time;
+}
+
+
+function seekTo(time) {
+    if (!Number.isFinite(time)) {
+        return;
+    }
+
+    try {
+        video.currentTime = Math.max(0, clampToSeekable(time));
+    } catch {}
+
+    updateVideoControls();
 }
 
 
@@ -1901,22 +2256,46 @@ progressTrack.oninput =
         progressDragging = true;
         showPlayerControls();
 
-        if (Number.isFinite(video.duration)) {
-            video.currentTime =
-                video.duration *
-                Number(progressTrack.value) /
-                100;
+        const range = getSeekRange();
+
+        if (!range.seekable) {
+            return;
         }
+
+        // Chua tua duoc (live khong co DVR) -> thanh tua dung yen.
+        const percent = Number(progressTrack.value);
+
+        progressFill.style.width = percent + "%";
+
+        seekTo(
+            range.start +
+            (range.end - range.start) * percent / 100
+        );
     };
 
 
-progressTrack.addEventListener(
-    "change",
-    () => {
-        progressDragging = false;
-        hidePlayerControlsSoon();
+// Ket thuc keo tua. Tren mobile su kien "change" co the ban ra tre hoac
+// khong ban ra, nen nghe them pointer/touch de tra progressDragging ve false
+// -> tranh thanh tua bi "ket" va khong tu cap nhat lai theo video.
+function endProgressDrag() {
+    if (!progressDragging) {
+        return;
     }
-);
+
+    progressDragging = false;
+
+    updateVideoControls();
+    hidePlayerControlsSoon();
+}
+
+
+progressTrack.addEventListener("change", endProgressDrag);
+
+progressTrack.addEventListener("pointerup", endProgressDrag);
+
+progressTrack.addEventListener("touchend", endProgressDrag);
+
+progressTrack.addEventListener("touchcancel", endProgressDrag);
 
 
 playButton.onclick =
@@ -1948,12 +2327,25 @@ volumeRange.oninput =
 
 fullscreenButton.onclick =
     async () => {
-        const playerBox = document.querySelector(".player-box");
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen?.();
+                return;
+            }
 
-        if (!document.fullscreenElement) {
-            await playerBox.requestFullscreen?.();
-        } else {
-            await document.exitFullscreen?.();
+            const box =
+                document.querySelector(".player-box");
+
+            if (box && box.requestFullscreen) {
+                await box.requestFullscreen();
+                return;
+            }
+
+            // Safari tren iOS khong fullscreen duoc the div:
+            // phai dung fullscreen cua chinh the <video>.
+            video.webkitEnterFullscreen?.();
+        } catch (e) {
+            console.warn("Fullscreen error:", e);
         }
     };
 
@@ -2085,29 +2477,28 @@ video.addEventListener(
 
 
 function seekVideo(seconds) {
-    if (!Number.isFinite(video.duration)) {
+    const range = getSeekRange();
+
+    // Live khong co cua so tua (DVR) -> khong tua duoc.
+    if (!range.seekable) {
         return;
     }
 
-    video.currentTime = Math.max(
-        0,
-        Math.min(
-            video.duration,
-            video.currentTime + seconds
-        )
-    );
+    seekTo(video.currentTime + seconds);
+
+    showPlayerControls();
 }
 
 
 function seekLive() {
-    if (video.seekable.length) {
-        video.currentTime =
-            video.seekable.end(
-                video.seekable.length - 1
-            );
-    } else if (Number.isFinite(video.duration)) {
-        video.currentTime = video.duration;
+    const range = getSeekRange();
+
+    if (range.seekable) {
+        // Moc cuoi cua cua so tua = dang xem truc tiep.
+        seekTo(range.end);
     }
+
+    showPlayerControls();
 }
 
 
@@ -5073,6 +5464,11 @@ function escapeHtml(
 
 
     await loadData();
+
+
+    // Dong bo trang thai thanh cong cu ngay khi mo trang (nut play/mute,
+    // thanh tua live/VOD) thay vi cho su kien video dau tien.
+    updateVideoControls();
 
 
     footballRefreshTimer =
