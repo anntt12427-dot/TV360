@@ -2174,9 +2174,10 @@ async function initPlayer() {
                 backoffFactor: 1.5
             },
             lowLatencyMode: false,
-            bufferingGoal: 30,
-            rebufferingGoal: 8,
-            bufferBehind: 60,
+            // Tang buffer de video muot hon, it rebuffer tren mang yeu.
+            bufferingGoal: 60,
+            rebufferingGoal: 12,
+            bufferBehind: 90,
             // Cho Shaka tu phuc hoi MSE khi gap loi decode segment
             // (nhieu kenh DASH live tra segment loi thoang qua).
             allowMediaSourceRecoveries: true,
@@ -3573,23 +3574,33 @@ async function playHLS(
                 enableWorker:
                     true,
 
+                // Tat lowLatencyMode: LL-HLS buoc phai tai segment nho lien tuc,
+                // mang yeu se giut lien tuc. Tueuuan buffer dai hon cho muot.
                 lowLatencyMode:
-                    true,
+                    false,
 
+                // Giam sync duration de bat dau phat nhanh hon (4 * targetDuration).
                 liveSyncDurationCount:
                     4,
 
                 liveMaxLatencyDurationCount:
-                    8,
+                    16,
 
                 maxLiveSyncPlaybackRate:
                     1.5,
 
                 backBufferLength:
-                    20,
+                    60,
 
+                // Tang buffer toi 60s de video muot hon, khong bi giut khi mang yeu.
                 maxBufferLength:
-                    12,
+                    60,
+
+                maxBufferSize:
+                    90 * 1000 * 1000,
+
+                maxMaxBufferLength:
+                    120,
 
                 manifestLoadingMaxRetry:
                     5,
@@ -3601,7 +3612,15 @@ async function playHLS(
                     5,
 
                 fragLoadingMaxRetryTimeout:
-                    3000
+                    3000,
+
+                // ABR: bat dau o muc uoc luong ~1.5 Mbps thay vi muc thap nhat
+                // -> len nhanh hon, mang yeu van duoc chuan do rebuffer.
+                abrEwmaDefaultEstimate: 1500000,
+
+                abrBandWidthFactor: 0.9,
+
+                startLevel: -1
             });
 
 
@@ -3627,8 +3646,13 @@ async function playHLS(
                     data.type ===
                     Hls.ErrorTypes.NETWORK_ERROR
                 ) {
-
+                    // Loi manifest/level/fragment mang: bam dau hien tai ->
+                    // startLoad() se tai lai tu segment dang dung, khong restart tu dau.
                     try {
+                        if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+                            data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT) {
+                            hlsPlayer.loadSource(hlsPlayer.url);
+                        }
                         hlsPlayer.startLoad();
                     } catch {}
 
@@ -3640,7 +3664,7 @@ async function playHLS(
                     data.type ===
                     Hls.ErrorTypes.MEDIA_ERROR
                 ) {
-
+                    // Thu recover media; neu bi gap loi -> append vao hang cho doi.
                     try {
                         hlsPlayer.recoverMediaError();
                     } catch {}
