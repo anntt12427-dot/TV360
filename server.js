@@ -585,7 +585,7 @@ async function fetchResponseWithRetry(
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
         try {
-            const response = await fetchResponse(
+            const response = await fetchResponseTracked(
                 url,
                 headers,
                 allowInsecure,
@@ -630,6 +630,53 @@ async function fetchResponseWithRetry(
     throw lastError;
 }
 
+// ======================================================
+// CORS CUA NGUON: CO PHAT TRUC TIEP TREN BROWSER DUOC KHONG
+// ======================================================
+// hls.js tai playlist/segment bang XHR (MSE) nen THIEU header
+// Access-Control-Allow-Origin la browser chan ngay -> video dung hinh.
+// Ghi nho ACAO cua lan fetch manifest gan nhat theo URL cuoi, dung de quyet
+// dinh phat truc tiep tu CDN (muot nhu VLC) hay phai di qua /api/proxy.
+const UPSTREAM_CORS_CACHE = new Map();
+
+function rememberUpstreamCors(response) {
+    try {
+        const url = String((response && response.url) || "");
+        if (!url) return;
+        if (UPSTREAM_CORS_CACHE.size > 500) UPSTREAM_CORS_CACHE.clear();
+        UPSTREAM_CORS_CACHE.set(
+            url,
+            !!String(
+                response.headers.get("access-control-allow-origin") || ""
+            )
+        );
+    } catch {}
+}
+
+// null = chua biet (coi nhu phat truc tiep duoc, client se tu du phong).
+function upstreamCorsOk(url) {
+    const value = UPSTREAM_CORS_CACHE.get(String(url || ""));
+    return value === undefined ? null : value;
+}
+
+async function fetchResponseTracked(
+    url,
+    headers = {},
+    allowInsecure = false,
+    timeoutMs = FETCH_TIMEOUT_MS
+) {
+    const response = await fetchResponse(
+        url,
+        headers,
+        allowInsecure,
+        timeoutMs
+    );
+
+    rememberUpstreamCors(response);
+
+    return response;
+}
+
 function proxyUrl(url, profile = "", referer = "") {
     return "/api/proxy?url=" +
         encodeURIComponent(url)
@@ -640,6 +687,91 @@ function proxyUrl(url, profile = "", referer = "") {
         (referer
             ? "&ref=" + encodeURIComponent(referer)
             : "");
+}
+
+// ======================================================
+// CHON NGUON PHAT: TRUC TIEP (NHU VLC) HAY QUA PROXY
+// ======================================================
+// Proxy lam MOI segment HLS di vong qua Railway -> ton bang thong, tang do
+// tre va gay giat/dung tren mobile (cang nhieu nguoi xem cang lag vi nghe
+// co chai server). Nguyen tac moi (uu tien muot nhu VLC/dan link m3u vao
+// browser):
+//   - Neu kenh KHONG doi header rieng (Referer/#EXTVLCOPT, UA la...): tra
+//     URL goc lam nguon chinh de browser tai TRUC TIEP tu CDN.
+//   - /api/proxy chi la du phong khi truc tiep loi (CORS/403/mang).
+// Ly do bo chan CORS phia server: fetch cua server KHONG gui Origin nen
+// nhieu CDN khong tra ACAO -> danh gia sai la "thieu CORS" roi ep proxy
+// vo ich. Browser moi la noi quyet dinh dung: hls.js loi NETWORK_ERROR /
+// CORS thi client tu nhay sang proxy (da co san trong playHLS).
+function isBrowserUserAgent(ua) {
+    return !ua || /mozilla\/5\.0/i.test(String(ua));
+}
+
+function buildPlayUrls(detected, headers = {}) {
+    const finalUrl = String((detected && detected.finalUrl) || "");
+    const kind = String((detected && detected.kind) || "");
+
+    const referer = headers.Referer || headers.referer || "";
+    const ua = String(headers["User-Agent"] || headers["user-agent"] || "");
+
+    // Nguon doi header rieng: Referer la forbidden header (JS khong set duoc),
+    // User-Agent cua browser cung khong doi duoc -> bat buoc phai proxy.
+    const needsOwnHeader = !!referer || !isBrowserUserAgent(ua);
+
+    const dalvikDash = kind === "dash" && /dalvik/i.test(ua);
+
+    const proxyPlayUrl = proxyUrl(
+        finalUrl,
+        dalvikDash ? "dalvik" : "",
+        referer
+    );
+
+    // DASH co ClearKey/dalvik can rewrite manifest -> giu proxy khi can.
+    // Con lai (ke ca DASH clear thuong): uu tien truc tiep nhu VLC.
+    if (kind === "dash" && dalvikDash) {
+        return {
+            directUrl: finalUrl,
+            proxyPlayUrl,
+            directOk: false,
+            corsBlocksHls: false,
+            playUrl: proxyPlayUrl,
+            playFallbackUrl: ""
+        };
+    }
+
+    if (kind === "dash") {
+        return {
+            directUrl: finalUrl,
+            proxyPlayUrl,
+            directOk: !needsOwnHeader,
+            corsBlocksHls: false,
+            playUrl: finalUrl,
+            playFallbackUrl: proxyPlayUrl
+        };
+    }
+
+    // HLS (hls.js/XHR) va VIDEO (<video src>): chi bat buoc proxy khi doi
+    // header rieng. Thieu CORS chi la goi y (client tu fallback), khong
+    // duoc ep proxy o day de tranh vong qua Railway gay lag.
+    const corsBlocksHls = kind === "hls" && upstreamCorsOk(finalUrl) === false;
+
+    const directOk =
+        (kind === "hls" || kind === "video") &&
+        !needsOwnHeader;
+
+    return {
+        directUrl: finalUrl,
+        proxyPlayUrl,
+        directOk,
+        corsBlocksHls,
+        playUrl: directOk ? finalUrl : proxyPlayUrl,
+        // Luon giu du phong nguoc lai: truc tiep hong -> proxy; proxy
+        // hong (it gap) -> thu truc tiep. Rieng kenh doi Referer/UA la thi
+        // truc tiep chac chan 403 nen bo du phong cho do nhay hinh.
+        playFallbackUrl: directOk
+            ? proxyPlayUrl
+            : (needsOwnHeader ? "" : finalUrl)
+    };
 }
 
 function escapeXmlAttribute(value) {
@@ -3243,31 +3375,21 @@ app.get(
                     ...channel.headers
                 };
 
+            // Quyet dinh phat truc tiep (muot nhu VLC) hay qua proxy: chi tinh
+            // header do CHINH playlist khai bao (#EXTVLCOPT), khong tinh UA
+            // mac dinh dung de fetch cua server (Lavf/... ) de tranh proxy vo ich.
+            const playUrls =
+                buildPlayUrls(
+                    detected,
+                    channel.headers || {}
+                );
+
             return res.json({
                 ok: true,
                 finalUrl:
                     detected.finalUrl ||
                     channel.url,
-                playUrl:
-                    detected.kind === "video" ||
-                    detected.kind === "hls" ||
-                    (
-                        detected.kind === "dash" &&
-                        String(
-                            streamHeaders["User-Agent"] ||
-                            streamHeaders["user-agent"] ||
-                            ""
-                        ).toLowerCase().includes("dalvik")
-                    )
-                        ? proxyUrl(
-                            detected.finalUrl ||
-                            channel.url,
-                            detected.kind === "dash"
-                                ? "dalvik"
-                                : ""
-                        )
-                        : detected.finalUrl ||
-                          channel.url,
+                ...playUrls,
                 kind:
                     detected.kind,
                 contentType:
@@ -3478,9 +3600,10 @@ app.get(
             }
 
             // Stream truc tiep, khong buffer -> tiet kiem RAM tren Railway free.
-            // Gioi han so byte de mot request loi khong dot het bang thong.
+            // KHONG cat byte giua chung: HLS live khong co diem dung, cat o
+            // 25MB se lam video dang xem bi dung hinh (dung nhu VLC thi phai
+            // de stream chay lien tuc; client Stop/doi kenh se dong ket noi).
             const source = Readable.fromWeb(upstream.body);
-            let sent = 0;
             let aborted = false;
 
             // CHI destroy(source): Readable.fromWeb da "lock" upstream.body,
@@ -3491,14 +3614,6 @@ app.get(
                 aborted = true;
                 try { source.destroy(); } catch {}
             };
-
-            source.on("data", chunk => {
-                sent += chunk.length;
-                if (sent > MAX_PROXY_BYTES) {
-                    abortUpstream();
-                    try { res.end(); } catch {}
-                }
-            });
 
             source.on("error", () => {
                 abortUpstream();
@@ -3840,12 +3955,13 @@ app.get(
             // RESPONSE
             // ==================================================
 
-            // Referer nguồn để proxy gửi kèm (Chuối Chiên, Sao Kê...
-            // đều yêu cầu Referer riêng nếu không sẽ 403).
-            const sourceReferer =
-                headers.Referer ||
-                headers.referer ||
-                "";
+            // Quyet dinh phat truc tiep (muot nhu VLC) hay qua proxy dua tren
+            // header cua chinh kenh (Referer/#EXTVLCOPT) + CORS cua CDN.
+            const playUrls =
+                buildPlayUrls(
+                    detected,
+                    headers
+                );
 
             return res.json({
 
@@ -3853,25 +3969,7 @@ app.get(
 
                 finalUrl,
 
-                playUrl:
-                    detected.kind === "video" ||
-                    detected.kind === "hls" ||
-                    (
-                        detected.kind === "dash" &&
-                        String(
-                            headers["User-Agent"] ||
-                            headers["user-agent"] ||
-                            ""
-                        ).toLowerCase().includes("dalvik")
-                    )
-                        ? proxyUrl(
-                            finalUrl,
-                            detected.kind === "dash"
-                                ? "dalvik"
-                                : "",
-                            sourceReferer
-                        )
-                        : finalUrl,
+                ...playUrls,
 
                 kind:
                     detected.kind,

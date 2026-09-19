@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>play diag</title>
+</head>
+
+<body style="margin:0;background:#111;color:#ddd">
+
+<pre id="probe">RUNNING</pre>
+
+<iframe
+    id="f"
+    src="/"
+    style="width:1000px;height:640px;border:0"
+></iframe>
+
+<script>
+const params = new URLSearchParams(location.search);
+const WANT = params.get("ch") || "VTV1";
+const logs = [];
+const out = document.getElementById("probe");
+const frame = document.getElementById("f");
+
+function fmt(a) {
+    return a.map(x => {
+        if (typeof x === "string") return x;
+        try { return JSON.stringify(x).slice(0, 240); } catch { return String(x); }
+    }).join(" ");
+}
+
+frame.addEventListener("load", () => {
+    const w = frame.contentWindow;
+
+    for (const level of ["log", "warn", "error"]) {
+        const orig = w.console[level].bind(w.console);
+        w.console[level] = (...a) => {
+            logs.push(level.toUpperCase() + ": " + fmt(a));
+            orig(...a);
+        };
+    }
+
+    w.addEventListener("error", e => logs.push("WINDOW_ERROR: " + e.message));
+
+    setTimeout(() => {
+        const doc = w.document;
+
+        // Vao tab TV
+        doc.getElementById("tvTab").click();
+
+        const t0 = Date.now();
+
+        const timer = setInterval(() => {
+            const cards = [...doc.querySelectorAll("#list .channel")];
+
+            if (!cards.length) {
+                if (Date.now() - t0 > 60000) {
+                    clearInterval(timer);
+                    done("KHONG CO KENH SAU 60s");
+                }
+                return;
+            }
+
+            const card = cards.find(c =>
+                (c.querySelector(".channel-name")?.textContent || "").includes(WANT)
+            );
+
+            if (!card) {
+                clearInterval(timer);
+                done("KHONG TIM THAY KENH " + WANT);
+                return;
+            }
+
+            clearInterval(timer);
+            logs.push("CLICK: " + (card.querySelector(".channel-name")?.textContent || ""));
+            card.click();
+
+            setTimeout(() => report(doc, w), 22000);
+        }, 700);
+    }, 3000);
+});
+
+function videoState(doc) {
+    const v = doc.getElementById("video");
+
+    if (!v) return { error: "khong co video" };
+
+    const buffered = [];
+
+    for (let i = 0; i < v.buffered.length; i++) {
+        buffered.push([Math.round(v.buffered.start(i)), Math.round(v.buffered.end(i))]);
+    }
+
+    const seekable = [];
+
+    for (let i = 0; i < v.seekable.length; i++) {
+        seekable.push([Math.round(v.seekable.start(i)), Math.round(v.seekable.end(i))]);
+    }
+
+    return {
+        paused: v.paused,
+        readyState: v.readyState,
+        networkState: v.networkState,
+        videoWidth: v.videoWidth,
+        videoHeight: v.videoHeight,
+        duration: v.duration,
+        currentTime: v.currentTime,
+        playbackRate: v.playbackRate,
+        muted: v.muted,
+        volume: v.volume,
+        error: v.error ? (v.error.code + ":" + v.error.message) : null,
+        src: String(v.currentSrc || v.src || "").slice(0, 140),
+        buffered,
+        seekable
+    };
+}
+
+function report(doc, w) {
+    const payload = {
+        status: doc.getElementById("status")?.textContent || "",
+        errorBox: (doc.getElementById("error")?.textContent || "").slice(0, 600),
+        title: doc.getElementById("title")?.textContent || "",
+        video: videoState(doc),
+        hlsPlayer: w.hlsPlayer ? "co" : "khong",
+        mpegts: w.mpegtsPlayer ? "co" : "khong",
+        shaka: w.shakaPlayer ? "co" : "khong",
+        logs: logs.slice(-45)
+    };
+
+    out.textContent = "PROBE:" + JSON.stringify(payload, null, 1) + ":END";
+    out.style.whiteSpace = "pre-wrap";
+}
+
+function done(msg) {
+    out.textContent = "PROBE:" + JSON.stringify({ fail: msg, logs: logs.slice(-30) }) + ":END";
+}
+</script>
+
+</body>
+
+</html>

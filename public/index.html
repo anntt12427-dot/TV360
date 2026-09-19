@@ -3818,9 +3818,16 @@ async function playFootballChannel(
         await stopPlayer();
 
 
+        const sources =
+            pickPlaySources(result);
+
         const url =
-            result.playUrl ||
+            sources.primary ||
             result.url;
+
+
+        const fallbackUrl =
+            sources.fallback;
 
 
         // ==================================================
@@ -3886,7 +3893,8 @@ async function playFootballChannel(
         ) {
 
             await playHLS(
-                url
+                url,
+                fallbackUrl
             );
 
             return;
@@ -3908,11 +3916,10 @@ async function playFootballChannel(
         // VIDEO
         // ==================================================
 
-        video.src =
-            url;
-
-
-        await video.play();
+        await playDirectVideo(
+            url,
+            fallbackUrl
+        );
 
 
         status.textContent =
@@ -3942,17 +3949,84 @@ async function playFootballChannel(
 
 
 // =====================================================
+// CHỌN NGUỒN PHÁT TỐI ƯU CHO THIẾT BỊ
+// =====================================================
+// Server trả về:
+//   playUrl         : nguồn ưu tiên (URL gốc CDN nếu phát trực tiếp được,
+//                     ngược lại là URL proxy của server)
+//   playFallbackUrl : nguồn dự phòng dùng khi nguồn ưu tiên lỗi
+//   directUrl       : URL gốc CDN
+//   corsBlocksHls   : true khi CDN thiếu CORS (hls.js bị chặn)
+//
+// Thiết bị dùng MSE (hls.js) cần CORS nên đi theo server. Safari/iPhone
+// phát HLS native (không bị CORS chặn) -> ưu tiên URL gốc cho mượt như VLC.
+
+function pickPlaySources(result) {
+
+    const primary =
+        result.playUrl ||
+        result.finalUrl ||
+        result.url ||
+        "";
+
+    const fallback =
+        result.playFallbackUrl || "";
+
+    const nativeHls =
+        !(typeof Hls !== "undefined" && Hls.isSupported()) &&
+        video.canPlayType("application/vnd.apple.mpegurl");
+
+    // Nguồn chỉ phải proxy vì thiếu CORS mà máy này không dùng MSE:
+    // phát trực tiếp từ CDN cho mượt, proxy làm nguồn dự phòng.
+    if (
+        nativeHls &&
+        result.corsBlocksHls &&
+        result.directUrl &&
+        result.directUrl !== primary
+    ) {
+        return {
+            primary: result.directUrl,
+            fallback: primary
+        };
+    }
+
+    // Nguồn ưu tiên là URL proxy (nguồn đòi Referer/User-Agent riêng) thì URL
+    // gốc chắc chắn không phát được trên browser -> bỏ dự phòng trực tiếp.
+    if (/^\/api\/proxy\?/.test(primary)) {
+        return {
+            primary,
+            fallback: ""
+        };
+    }
+
+    return {
+        primary,
+        fallback
+    };
+}
+
+
+// =====================================================
 // HLS
 // =====================================================
 
 async function playHLS(
-    url
+    url,
+    fallbackUrl
 ) {
 
     /*
      * playHLS() được gọi sau stopPlayer()
      * nên lúc này HLS/Shaka cũ đã được hủy.
+     *
+     * url         : nguồn ưu tiên (URL gốc CDN -> tải trực tiếp cho mượt
+     *               như VLC, không đi vòng qua server).
+     * fallbackUrl : nguồn dự phòng (thường là /api/proxy) dùng khi nguồn
+     *               chính bị CORS/403/mạng -> tự chuyển, không treo hình.
      */
+
+    // Chỉ đổi sang nguồn dự phòng 1 lần cho mỗi lần bấm kênh.
+    let hlsFallbackUsed = false;
 
     if (
         typeof Hls !== "undefined" &&
@@ -3972,26 +4046,33 @@ async function playHLS(
 
                 // Giam sync duration de bat dau phat nhanh hon (4 * targetDuration).
                 liveSyncDurationCount:
-                    4,
+                    3,
 
                 liveMaxLatencyDurationCount:
-                    16,
+                    10,
 
                 maxLiveSyncPlaybackRate:
                     1.5,
 
                 backBufferLength:
-                    60,
+                    30,
 
-                // Tang buffer toi 60s de video muot hon, khong bi giut khi mang yeu.
+                // Buffer vua du cho live: 60s lam tre live qua lau + ton RAM
+                // mobile (hls.js giu 90MB trong bo nho). 30s van muot tren
+                // mang yeu ma khong bi "dung hinh tich luy" nhu truoc.
                 maxBufferLength:
-                    60,
+                    30,
 
                 maxBufferSize:
-                    90 * 1000 * 1000,
+                    60 * 1000 * 1000,
 
                 maxMaxBufferLength:
-                    120,
+                    60,
+
+                // Mobile: gioi han chat luong theo kich thuoc khung hinh ->
+                // giam bang thong, it giat hon han khi mang yeu.
+                capLevelToPlayerSize:
+                    true,
 
                 manifestLoadingMaxRetry:
                     5,
@@ -4037,6 +4118,38 @@ async function playHLS(
                     data.type ===
                     Hls.ErrorTypes.NETWORK_ERROR
                 ) {
+                    // Nguồn chính (phát trực tiếp từ CDN) bị chặn: CORS,
+                    // 403/404/URL hết hạn... -> chuyển ngay sang nguồn dự
+                    // phòng (proxy của server) thay vì để đứng hình.
+                    if (fallbackUrl && !hlsFallbackUsed) {
+                        hlsFallbackUsed = true;
+
+                        console.warn(
+                            "HLS: nguồn chính lỗi (" +
+                            data.details +
+                            ") -> chuyển nguồn dự phòng"
+                        );
+
+                        const deadPlayer = hlsPlayer;
+                        hlsPlayer = null;
+
+                        Promise.resolve(
+                            deadPlayer?.destroy?.()
+                        )
+                            .catch(() => {})
+                            .then(() => playHLS(fallbackUrl))
+                            .catch(err => {
+                                console.error(
+                                    "HLS FALLBACK ERROR:",
+                                    err
+                                );
+                                errorBox.textContent =
+                                    err?.message || String(err);
+                            });
+
+                        return;
+                    }
+
                     // Loi manifest/level/fragment mang: bam dau hien tai ->
                     // startLoad() se tai lai tu segment dang dung, khong restart tu dau.
                     try {
@@ -4140,6 +4253,88 @@ async function playHLS(
     throw new Error(
         "Trình duyệt không hỗ trợ HLS"
     );
+}
+
+
+// =====================================================
+// VIDEO TRỰC TIẾP (mp4/ts...) + NGUỒN DỰ PHÒNG
+// =====================================================
+// File video phát trực tiếp từ CDN cho mượt (giống VLC); nếu nguồn lỗi
+// 403/404/mạng thì tự chuyển sang URL dự phòng (proxy) trước khi báo lỗi.
+
+function loadVideoSource(src) {
+
+    return new Promise((resolve, reject) => {
+
+        const onError = () => {
+            cleanup();
+
+            reject(
+                new Error(
+                    "Không tải được video (mã lỗi " +
+                    (video.error ? video.error.code : "?") +
+                    ")"
+                )
+            );
+        };
+
+        const onLoaded = () => {
+            cleanup();
+            resolve();
+        };
+
+        const cleanup = () => {
+            video.removeEventListener("error", onError);
+            video.removeEventListener("loadeddata", onLoaded);
+        };
+
+        video.addEventListener("error", onError);
+        video.addEventListener("loadeddata", onLoaded);
+
+        video.src = src;
+    });
+}
+
+
+async function playDirectVideo(url, fallbackUrl) {
+
+    const candidates = [url];
+
+    if (fallbackUrl && fallbackUrl !== url) {
+        candidates.push(fallbackUrl);
+    }
+
+    let lastError = null;
+
+    for (const src of candidates) {
+
+        try {
+
+            await loadVideoSource(src);
+
+        } catch (e) {
+
+            lastError = e;
+
+            console.warn(
+                "VIDEO nguồn lỗi, thử nguồn tiếp theo:",
+                src,
+                e.message
+            );
+
+            continue;
+        }
+
+        try {
+            await video.play();
+        } catch (e) {
+            console.warn("Autoplay:", e);
+        }
+
+        return;
+    }
+
+    throw lastError || new Error("Không phát được video");
 }
 
 let mpegtsRecoverCount = 0;
@@ -5051,11 +5246,16 @@ async function playTV(channel) {
 
         await stopPlayer();
 
+        const sources =
+            pickPlaySources(result);
+
         const url =
-            result.playUrl ||
-            result.finalUrl ||
-            result.url ||
+            sources.primary ||
             channel.url;
+
+
+        const fallbackUrl =
+            sources.fallback;
 
         const clearKeys =
             result.clearKeys || {};
@@ -5081,7 +5281,10 @@ async function playTV(channel) {
                 "TV PLAY TYPE: HLS"
             );
 
-            await playHLS(url);
+            await playHLS(
+                url,
+                fallbackUrl
+            );
 
             status.textContent =
                 "🔴 Đang phát";
@@ -5162,9 +5365,10 @@ async function playTV(channel) {
             "TV PLAY TYPE: DIRECT VIDEO"
         );
 
-        video.src = url;
-
-        await video.play();
+        await playDirectVideo(
+            url,
+            fallbackUrl
+        );
 
         status.textContent =
             "🔴 Đang phát";
