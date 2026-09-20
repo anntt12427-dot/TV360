@@ -83,9 +83,12 @@ function gzipMiddleware(req, res, next) {
         try {
             const buf = Buffer.from(JSON.stringify(body));
             if (buf.length < 1024) return origJson(body);
-            res.setHeader("Content-Encoding", "gzip");
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.removeHeader("Content-Length");
+            // BAT BUOC khai bao Content-Encoding: khong co header nay
+            // browser nhan body gzip ma KHONG tu giai nen ->
+            // response.json() bao "Unexpected token ..." (loi tai
+            // playlist o cac tab).
+            res.setHeader("Content-Encoding", "gzip");
             return origSend(zlib.gzipSync(buf));
         } catch { return origJson(body); }
     };
@@ -101,7 +104,9 @@ const DEFAULT_UA =
 // ======================================================
 
 const PLAYLISTS = {
-    football: "https://livesport.s.gy/easport",
+    // Da bo nguon livesport (easport) + tab "The thao quoc te"
+    // theo yeu cau: chi giu 2 nguon chinh la tv (vmt47) va
+    // vnfootball (ttthethao5).
     tv: "https://tinyurl.com/vmt47",
     vnfootball: "https://tinyurl.com/ttthethao5"
 };
@@ -493,6 +498,15 @@ async function fetchWithTimeout(url, headers = {}, timeoutMs = FETCH_TIMEOUT_MS)
 
                 "Accept":
                     "*/*",
+
+                // Khong dong y gzip/br voi upstream: mot so nguon
+                // (tinyurl + CDN dich) tra header Content-Encoding sai
+                // khong khop voi body -> undici throw
+                // "incorrect header check" -> playlist fetch fail lan
+                // ca retry -> list trong. Xin body goc (identity)
+                // de khong phai giai nen, on dinh hon.
+                "Accept-Encoding":
+                    "identity",
 
                 ...headers
             }
@@ -1875,7 +1889,7 @@ function matchGroupKey(title) {
         .trim();
 }
 
-function parseM3U(text) {
+function parseM3U(text, playlistType = "") {
 
     const lines =
         String(text || "")
@@ -1924,15 +1938,6 @@ function parseM3U(text) {
                     );
             }
 
-            const name =
-                commaIndex !== -1
-                    ? line
-                        .slice(
-                            commaIndex + 1
-                        )
-                        .trim()
-                    : "Unknown";
-
             const getAttr =
                 attr => {
 
@@ -1952,6 +1957,79 @@ function parseM3U(text) {
                         ? match[1]
                         : "";
                 };
+
+            // ==================================================
+            // LOC NHOM KENH KHONG PHAT (playlist vmt47)
+            // ==================================================
+            // Bo cac nhom BLV "Ga Vang", "CoLa TVM", "Khan Dai",
+            // "Bau Cua"...: luong khong on dinh, khong phat duoc
+            // tren web -> khong hien len danh sach cho nhe UI.
+            // Nhom kenh nuoc ngoai (Han Quoc, Trung Quoc, Thai Lan)
+            // GIU NGUYEN theo yeu cau.
+            // ==================================================
+
+            const groupName =
+                getAttr("group-title");
+
+            // Chuan hoa khong dau de bat duoc moi bien the dau
+            // (Ga Vang / Gà Vàng / ga vang...), tranh sot khi regex
+            // liet ke thu cong thieu ky tu.
+            const deaccent = text =>
+                text
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/đ/g, "d")
+                    .replace(/Đ/g, "D")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "")
+                    .trim();
+
+            const BANNED_GROUPS = [
+                // Chi loc cac nhom BLV bong da khong phat duoc tren web
+                // (Ga Vang, CoLa, Khan Dai, Bau Cua...).
+                // KHONG loc nhom kenh nuoc ngoai (Han Quoc, Trung Quoc,
+                // Thai Lan...) - giu nguyen theo yeu cau.
+                "gavang",
+                "colatvm",
+                "colatv",
+                "khandai",
+                "baucua"
+            ];
+
+            const isBanned = text =>
+                BANNED_GROUPS.some(keyword =>
+                    deaccent(text).includes(keyword)
+                );
+
+            if (isBanned(groupName)) {
+                current = null;
+                pendingHeaders = {};
+                continue;
+            }
+
+            const name =
+                commaIndex !== -1
+                    ? line
+                        .slice(
+                            commaIndex + 1
+                        )
+                        .trim()
+                    : "Unknown";
+
+            // Loc them theo TEN kenh (mot so kenh khong co
+            // group-title dac trung): Gio Vang, Chuoi Chien...
+            // CHI ap dung cho playlist TV (vmt47): ten tran trong
+            // list bong da VN (ttthethao5) chua ten doi/quoc gia
+            // (vd "Viet Nam vs Thai Lan") -> loc theo ten se mat
+            // tran that. Chi loc theo group o list do.
+            if (
+                playlistType === "tv" &&
+                (isBanned(name) || isBanned(getAttr("tvg-name")))
+            ) {
+                current = null;
+                pendingHeaders = {};
+                continue;
+            }
 
             current = {
 
@@ -2279,6 +2357,7 @@ function parseM3U(text) {
             // chua co stream -> bo qua de khong hien kenh chet len UI.
             // Dong thoi bo cac URL placeholder "no-signal" (BLV chua
             // co luong that, vi du freem3u.xyz/static/no-signal/...).
+            // (.flv GIU LAI: mpegts.js decode duoc FLV qua HTTP.)
             if (
                 /^(?:none|null|n\/a|-)$/i.test(line) ||
                 /\/no-signal\//i.test(line)
@@ -2560,7 +2639,8 @@ if (SAVE_PLAYLIST) {
 
     const channels =
         parseM3U(
-            result.text
+            result.text,
+            type
         );
 
     if (FOOTBALL_LIKE.has(type)) {
@@ -2840,11 +2920,13 @@ async function findChannelByUrl(url) {
     // Tim trong ca 3 nguon: TV, the thao quoc te, bong da VN.
     // (Bong da VN can header Referer/Origin tu #EXTVLCOPT, neu
     // khong tim thay channel thi header rong -> upstream tra 403.)
+    // Uu tien vnfootball truoc: nguon ttthethao5 phat truc tiep rat muot
+    // (nhu VLC) nen resolve nhanh nhat co the, khong lan qua TV/football.
     for (
         const type of [
+            "vnfootball",
             "tv",
-            "football",
-            "vnfootball"
+            "football"
         ]
     ) {
 
@@ -2864,7 +2946,7 @@ async function findChannelByUrl(url) {
                 );
 
             if (found) {
-                return found;
+                return { channel: found, type };
             }
 
         } catch (error) {
@@ -2894,9 +2976,7 @@ app.get(
             const type =
                 req.query.type === "tv"
                     ? "tv"
-                    : req.query.type === "vnfootball"
-                        ? "vnfootball"
-                        : "football";
+                    : "vnfootball";
 
             const channels =
                 await loadPlaylist(
@@ -3805,11 +3885,11 @@ app.get(
             // Tìm channel trong playlist
             // ==================================================
 
-            let channel = null;
+            let lookup = null;
 
             try {
 
-                channel =
+                lookup =
                     await findChannelByUrl(
                         url
                     );
@@ -3822,6 +3902,8 @@ app.get(
                 );
             }
 
+            const channel = lookup?.channel || null;
+
             const headers =
                 channel?.headers ||
                 {};
@@ -3829,6 +3911,112 @@ app.get(
             let clearKeys =
                 channel?.clearKeys ||
                 {};
+
+            // ==================================================
+            // FAST PATH: VN FOOTBALL (ttthethao5)
+            // ==================================================
+            // Nguon nay phat truc tiep rat muot nhu VLC (khong can
+            // proxy, khong ClearKey, khong header rieng). Chi can tim
+            // thay kenh tu playlist vnfootball thi tra ket qua NGAY:
+            // coi la HLS va phat thang URL goc, khong detect, khong
+            // hydrate key -> giam tinh Toi da do tre khi mo tran.
+            // ==================================================
+
+            // ==================================================
+            // FAST PATH: NGUỒN CẦN UA DALVIK (playlist vmt47)
+            // ==================================================
+            // Như /api/proxy: các nguồn vmttv/dpdns/tv360/mytvnet chỉ
+            // trả stream đúng khi được gọi với User-Agent Dalvik.
+            // Browser không tự đổi User-Agent được -> phát trực tiếp
+            // chắc chắn hỏng; trả NGAY proxy URL (server tự gắn UA +
+            // rewrite manifest) thay vì để client thử direct rồi fail.
+            // ==================================================
+
+            if (/tv360|vmttv|dpdns|mytvnet/i.test(url) || /vtvprime/i.test(url)) {
+
+                console.log(
+                    "DALVIK FAST RESOLVE (qua proxy):",
+                    url
+                );
+
+                const dalvikProxy = proxyUrl(url, "dalvik");
+
+                // Link khong duoi (vmttv.dpdns.org/tv360/?id=...) va cac
+                // kenh co ClearKey trong playlist la DASH; .m3u8 la HLS.
+                const hasKeys = Object.keys(clearKeys).length > 0;
+
+                const isDash =
+                    /\.mpd(?:\?|$)/i.test(url) ||
+                    hasKeys;
+
+                return res.json({
+
+                    ok: true,
+
+                    finalUrl: url,
+
+                    directUrl: url,
+                    proxyPlayUrl: dalvikProxy,
+                    directOk: false,
+                    corsBlocksHls: false,
+
+                    playUrl: dalvikProxy,
+                    playFallbackUrl: "",
+
+                    kind: isDash ? "dash" : "hls",
+                    contentType: isDash
+                        ? "application/dash+xml"
+                        : "application/vnd.apple.mpegurl",
+
+                    clearKeys,
+                    headers: {}
+                });
+            }
+
+            const refererHeader =
+                headers.Referer || headers.referer || "";
+
+            const uaHeader = String(
+                headers["User-Agent"] || headers["user-agent"] || ""
+            );
+
+            if (
+                lookup &&
+                lookup.type === "vnfootball" &&
+                !refererHeader &&
+                isBrowserUserAgent(uaHeader) &&
+                Object.keys(clearKeys).length === 0
+            ) {
+
+                console.log(
+                    "VN FOOTBALL FAST RESOLVE (truc tiep):",
+                    url
+                );
+
+                const fastProxy = proxyUrl(url);
+
+                return res.json({
+
+                    ok: true,
+
+                    finalUrl: url,
+
+                    directUrl: url,
+                    proxyPlayUrl: fastProxy,
+                    directOk: true,
+                    corsBlocksHls: false,
+
+                    // Phat truc tiep nhu VLC; proxy chi la du phong.
+                    playUrl: url,
+                    playFallbackUrl: fastProxy,
+
+                    kind: "hls",
+                    contentType: "application/vnd.apple.mpegurl",
+
+                    clearKeys: {},
+                    headers: {}
+                });
+            }
 
             console.log(
                 "CHANNEL FOUND:",

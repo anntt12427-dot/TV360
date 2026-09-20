@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -714,18 +714,22 @@ video {
 }
 
 /* Thanh tua: khung .progress-bar giu vi tri + ve nen/fill, input range
-   nam tren cung de nhan thao tac keo (vung cham cao 22-28px). */
+   nam tren cung de nhan thao tac keo (vung cham cao 22-28px).
+   Fix "roi" khoi player: khong de margin am, width tinh theo padding
+   cua .player-actions (left/right 12px desktop, 8px mobile). */
 .progress-bar {
 
     position: relative;
 
-    display: flex;
-
-    align-items: center;
+    display: block;
 
     width: 100%;
 
     height: 22px;
+
+    margin: 0 0 4px;
+
+    padding: 0;
 
     touch-action: none;
 }
@@ -786,13 +790,27 @@ video {
 
 .progress-track {
 
-    position: relative;
+    position: absolute;
+
+    top: 0;
+
+    right: 0;
+
+    left: 0;
+
+    display: block;
+
+    box-sizing: border-box;
 
     width: 100%;
 
     height: 22px;
 
     margin: 0;
+
+    padding: 0;
+
+    border: 0;
 
     background: transparent;
 
@@ -816,16 +834,24 @@ video {
 
     height: 22px;
 
+    margin: 0;
+
+    padding: 0;
+
     background: transparent;
 }
 
 .progress-track::-webkit-slider-thumb {
 
-    width: 16px;
+    width: 14px;
 
-    height: 16px;
+    height: 14px;
 
-    margin-top: 3px;
+    margin-top: 4px;
+
+    margin-right: 0;
+
+    margin-left: 0;
 
     border: 2px solid #fff;
 
@@ -870,27 +896,34 @@ video {
 
     align-items: center;
 
-    gap: 7px;
+    gap: 8px;
 
-    margin-top: 5px;
+    width: 100%;
+
+    min-width: 0;
+
+    margin: 0;
+
+    padding: 0;
 }
 
 .player-action,
 .speed-select,
-.quality-select,
-.volume-range {
+.quality-select {
 
-    height: 30px;
+    flex-shrink: 0;
+
+    height: 32px;
 
     border: 0;
 
-    border-radius: 6px;
+    border-radius: 8px;
 
     background: rgba(20, 20, 20, .72);
 
     color: #ddd;
 
-    padding: 0 9px;
+    padding: 0 10px;
 
     cursor: pointer;
 
@@ -910,7 +943,9 @@ video {
 
 .icon-button {
 
-    width: 32px;
+    width: 34px;
+
+    min-width: 34px;
 
     padding: 0;
 
@@ -919,27 +954,133 @@ video {
 
 .time-label {
 
-    min-width: 82px;
+    flex-shrink: 0;
+
+    min-width: 0;
 
     color: #eee;
 
     font-size: 11px;
 
     font-variant-numeric: tabular-nums;
+
+    white-space: nowrap;
 }
 
 .control-spacer {
 
-    flex: 1;
+    flex: 1 1 auto;
+
+    min-width: 4px;
+}
+
+/* Cum am luong: nut loa + thanh truot gon trong 1 khoi, khong de
+   input range thua 2 dau (reset padding/margin mac dinh cua input).
+   Mobile: cum nay la neo cho popup volume (position relative o desktop
+   khong can, nhung can tren mobile de popup bam theo). */
+.volume-group {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    flex-shrink: 0;
+
+    gap: 0;
+
+    height: 32px;
+
+    border-radius: 8px;
+
+    background: rgba(20, 20, 20, .72);
+
+    padding: 0 8px 0 2px;
+}
+
+.volume-group .player-action {
+
+    background: transparent;
+
+    height: 30px;
 }
 
 .volume-range {
 
-    width: 72px;
+    display: block;
+
+    box-sizing: border-box;
+
+    width: 64px;
+
+    height: 20px;
+
+    margin: 0;
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
 
     accent-color: #fff;
 
     cursor: pointer;
+
+    -webkit-appearance: none;
+
+    appearance: none;
+}
+
+.volume-range::-webkit-slider-runnable-track {
+
+    height: 4px;
+
+    border-radius: 2px;
+
+    background: rgba(255, 255, 255, .35);
+}
+
+.volume-range::-webkit-slider-thumb {
+
+    width: 12px;
+
+    height: 12px;
+
+    margin-top: -4px;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background: #fff;
+
+    -webkit-appearance: none;
+
+    appearance: none;
+}
+
+.volume-range::-moz-range-track {
+
+    height: 4px;
+
+    border-radius: 2px;
+
+    background: rgba(255, 255, 255, .35);
+}
+
+.volume-range::-moz-range-thumb {
+
+    width: 12px;
+
+    height: 12px;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background: #fff;
 }
 
 .player-action.live {
@@ -1208,86 +1349,249 @@ video {
     }
 
     .player-actions {
+
         padding: 16px 8px 8px;
+
+        /* Giu overflow-x hidden de hang nut khong tran, nhung overflow-y
+           phai visible de popup volume doc (bottom: 38px) khong bi cat. */
+        overflow-x: hidden;
+
+        overflow-y: visible;
     }
 
-    /* Mot hang duy nhat, khong wrap: thanh tua luon nam ngay tren cum nut
-       trong khung player. Cac nut it dung (toc do/chat luong) nam cuoi
-       hang, keo ngang de xem. */
-    .control-row {
-        gap: 6px;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 2px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .control-row::-webkit-scrollbar {
-        display: none;
-    }
-
-    .control-row > * {
-        flex-shrink: 0;
-    }
-
-    /* Uu tien: nut chinh luon hien truoc, khong can keo ngang */
-    #playButton { order: 1; }
-    #rewindButton { order: 2; }
-    #forwardButton { order: 3; }
-    #timeLabel { order: 4; }
-    .control-row > .control-spacer { order: 5; flex: 1 1 0; }
-    #muteButton { order: 6; }
-    #liveButton { order: 7; }
-    #fullscreenButton { order: 8; }
-    #speedSelect { order: 9; }
-    #qualitySelect { order: 10; }
-
-    .player-action,
-    .speed-select,
-    .quality-select {
-        height: 40px;
-        min-width: 40px;
-        font-size: 13px;
-        border-radius: 8px;
-    }
-
-    .icon-button {
-        width: 40px;
-        min-width: 40px;
-        height: 40px;
-    }
-
-    .quality-select {
-        max-width: 96px;
-    }
-
-    /* Vung cham thanh tua cao hon de keo bang ngon tay */
+    /* Hang 1: thanh tua. Hang 2: cum nut gon 1 hang.
+       Khong de margin am day thanh tua "roi" xuong duoi player. */
     .progress-bar {
+
         height: 28px;
+
+        margin: 0 0 4px;
     }
 
     .progress-track {
+
         height: 28px;
     }
 
     .progress-track::-webkit-slider-runnable-track {
+
         height: 28px;
     }
 
     .progress-track::-webkit-slider-thumb {
-        width: 18px;
-        height: 18px;
-        margin-top: 5px;
+
+        width: 16px;
+
+        height: 16px;
+
+        margin-top: 6px;
     }
 
-    .progress-track::-moz-range-track {
-        height: 28px;
+    /* Cum nut: gon 1 hang, khong cuon ngang, khong xuong dong.
+       Thu tu uu tien tren mobile: play -> tua lui/tien -> time ->
+       loa -> live -> fullscreen. Toc do + chat luong an bot (van
+       chinh duoc khi mo fullscreen hoac xoay ngang). */
+    .control-row {
+
+        gap: 4px;
+
+        flex-wrap: nowrap;
+
+        overflow: hidden;
+
+        padding-bottom: 0;
     }
 
-    .progress-track::-moz-range-thumb {
+    .control-row > * {
+
+        flex-shrink: 1;
+
+        min-width: 0;
+    }
+
+    .control-row > .control-spacer {
+
+        flex: 1 1 auto;
+
+        min-width: 2px;
+    }
+
+    #speedSelect,
+    #qualitySelect {
+
+        display: none;
+    }
+
+    .player-action,
+    .speed-select,
+    .quality-select {
+
+        height: 30px;
+
+        padding: 0 8px;
+
+        font-size: 11px;
+    }
+
+    .icon-button {
+
+        width: 30px;
+
+        min-width: 30px;
+
+        flex-shrink: 0;
+    }
+
+    #playButton,
+    #muteButton,
+    #liveButton,
+    #fullscreenButton {
+
+        flex-shrink: 0;
+    }
+
+    /* Mobile: an thanh truot ngang de hang nut gon. Muon chinh volume:
+       bam nut loa 1 cai -> popup volume doc hien ra ngay tren nut loa
+       (giong YouTube), keo len/xuong de chinh. Bam loa lan nua -> tat
+       tieng nhu cu. */
+    .volume-group {
+
+        background: transparent;
+
+        padding: 0;
+
+        height: 30px;
+
+        position: relative;
+
+        overflow: visible;
+    }
+
+    .volume-group .volume-range {
+
+        position: absolute;
+
+        /* Hop input 110x30 xoay -90 do quanh tam: hien thi doc 30x110,
+           tam trung voi nut loa (nut rong 30px, canh phai group). Xoay
+           -90 do thi dau min (trai) xuong duoi, dau max (phai) len tren:
+           keo len = to dan, giong YouTube. */
+        right: -40px;
+
+        bottom: 96px;
+
+        display: none;
+
+        width: 110px;
+
+        height: 30px;
+
+        margin: 0;
+
+        padding: 0 10px;
+
+        border-radius: 8px;
+
+        background: rgba(10, 10, 10, .92);
+
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .6);
+
+        transform: rotate(-90deg);
+
+        touch-action: none;
+    }
+
+    .volume-group .volume-range::-webkit-slider-runnable-track {
+
+        height: 4px;
+
+        border-radius: 2px;
+
+        background: rgba(255, 255, 255, .35);
+    }
+
+    .volume-group .volume-range::-webkit-slider-thumb {
+
         width: 14px;
+
         height: 14px;
+
+        margin-top: -5px;
+
+        border: 0;
+
+        border-radius: 50%;
+
+        background: #fff;
+
+        -webkit-appearance: none;
+
+        appearance: none;
+    }
+
+    .volume-group .volume-range::-moz-range-track {
+
+        height: 4px;
+
+        border-radius: 2px;
+
+        background: rgba(255, 255, 255, .35);
+    }
+
+    .volume-group .volume-range::-moz-range-thumb {
+
+        width: 14px;
+
+        height: 14px;
+
+        border: 0;
+
+        border-radius: 50%;
+
+        background: #fff;
+    }
+
+    .volume-group.volume-open .volume-range {
+
+        display: block;
+    }
+
+    .volume-group .player-action {
+
+        background: rgba(20, 20, 20, .72);
+
+        width: 30px;
+
+        min-width: 30px;
+    }
+
+    #rewindButton,
+    #forwardButton {
+
+        flex-shrink: 0;
+    }
+
+    .time-label {
+
+        flex-shrink: 1;
+
+        font-size: 10px;
+
+        max-width: 92px;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+    /* Man rat hep (<= 360px): an tiep 2 nut tua de hang nut khong
+       tran, van tua duoc bang cach keo thanh tua phia tren. */
+    @media (max-width: 360px) {
+
+        #rewindButton,
+        #forwardButton {
+
+            display: none;
+        }
     }
 
     .left {
@@ -1432,17 +1736,8 @@ video {
 <div class="top">
 
     <button
-        id="footballTab"
-        class="tab active"
-        onclick="switchMode('football')"
-    >
-        ⚽ THỂ THAO QUỐC TẾ
-    </button>
-
-
-    <button
         id="vnFootballTab"
-        class="tab"
+        class="tab active"
         onclick="switchMode('vnfootball')"
     >
         🇻🇳 BÓNG ĐÁ VN
@@ -1577,25 +1872,29 @@ video {
 
                 <div class="control-spacer"></div>
 
-                <button
-                    id="muteButton"
-                    class="player-action icon-button"
-                    type="button"
-                    title="Tắt tiếng"
-                >
-                    🔊
-                </button>
+                <div class="volume-group">
 
-                <input
-                    id="volumeRange"
-                    class="volume-range"
-                    type="range"
-                    min="0"
-                    max="1"
-                    value="1"
-                    step="0.05"
-                    aria-label="Âm lượng"
-                >
+                    <button
+                        id="muteButton"
+                        class="player-action icon-button"
+                        type="button"
+                        title="Tắt tiếng"
+                    >
+                        🔊
+                    </button>
+
+                    <input
+                        id="volumeRange"
+                        class="volume-range"
+                        type="range"
+                        min="0"
+                        max="1"
+                        value="1"
+                        step="0.05"
+                        aria-label="Âm lượng"
+                    >
+
+                </div>
 
                 <button
                     id="liveButton"
@@ -1700,7 +1999,7 @@ video {
 
 <script>
 
-let mode = "football";
+let mode = "vnfootball";
 
 let allData = [];
 
@@ -1917,7 +2216,10 @@ function hidePlayerControlsSoon() {
 
     if (!video.paused && !progressDragging) {
         controlsHideTimer = setTimeout(
-            () => playerBox.classList.add("controls-hidden"),
+            () => {
+                playerBox.classList.add("controls-hidden");
+                closeVolumePopup();
+            },
             3500
         );
     }
@@ -2310,8 +2612,41 @@ playButton.onclick =
     };
 
 
+function isMobileLayout() {
+
+    return window.matchMedia("(max-width: 860px)").matches;
+}
+
+
+function closeVolumePopup() {
+
+    const group =
+        document.querySelector(".volume-group");
+
+    group?.classList.remove("volume-open");
+}
+
+
 muteButton.onclick =
     () => {
+        // Mobile: bam loa lan dau -> mo popup volume doc de keo chinh
+        // am luong (thanh ngang da bi an cho gon). Bam tiep khi popup
+        // dang mo -> tat/mo tieng nhu cu.
+        if (isMobileLayout()) {
+            const group =
+                muteButton.closest(".volume-group");
+
+            if (
+                group &&
+                !group.classList.contains("volume-open")
+            ) {
+                group.classList.add("volume-open");
+                return;
+            }
+
+            group?.classList.remove("volume-open");
+        }
+
         video.muted = !video.muted;
         updateVideoControls();
     };
@@ -2323,6 +2658,37 @@ volumeRange.oninput =
         video.muted = video.volume === 0;
         updateVideoControls();
     };
+
+
+volumeRange.addEventListener(
+    "pointerdown",
+    event => event.stopPropagation()
+);
+
+
+volumeRange.addEventListener(
+    "touchstart",
+    event => event.stopPropagation(),
+    { passive: true }
+);
+
+
+// Bam ra ngoai popup volume thi dong lai (khong mute/unmute nham).
+document.addEventListener(
+    "pointerdown",
+    event => {
+        const group =
+            document.querySelector(".volume-group");
+
+        if (
+            group &&
+            group.classList.contains("volume-open") &&
+            !group.contains(event.target)
+        ) {
+            group.classList.remove("volume-open");
+        }
+    }
+);
 
 
 fullscreenButton.onclick =
@@ -2566,8 +2932,10 @@ async function initPlayer() {
             },
             lowLatencyMode: false,
             // Tang buffer de video muot hon, it rebuffer tren mang yeu.
-            bufferingGoal: 60,
-            rebufferingGoal: 12,
+            // Nhung buffer goal lon lam hinh len cham o giay dau (phai
+            // do du 60s moi nchoi) -> bat dau phat som, ABR tu no them.
+            bufferingGoal: 20,
+            rebufferingGoal: 4,
             bufferBehind: 90,
             // Cho Shaka tu phuc hoi MSE khi gap loi decode segment
             // (nhieu kenh DASH live tra segment loi thoang qua).
@@ -2691,15 +3059,6 @@ async function switchMode(
 
     document
         .getElementById(
-            "footballTab"
-        )
-        .classList.toggle(
-            "active",
-            mode === "football"
-        );
-
-    document
-        .getElementById(
             "vnFootballTab"
         )
         .classList.toggle(
@@ -2739,27 +3098,127 @@ async function switchMode(
     }
 
 
-    if (
-        mode === "football"
+}
+
+
+// =====================================================
+// WARM-UP CDN (preconnect)
+// =====================================================
+// Khi playlist da tai xong, lay ten host cua cac kenh dau danh sach va
+// bat trinh duyet mo san DNS+TLS toi CDN (nhu VLC khong phai cho DNS).
+// Khi nguoi dung bam kenh, ket noi da san sang -> bat dau phat nhanh hon
+// 100-500ms tren mobile (quan trong voi list ttthethao5).
+function warmUpStreamHosts(items) {
+
+    const hosts =
+        new Set();
+
+    const push =
+        url => {
+            try {
+                const u =
+                    new URL(
+                        String(url || "")
+                    );
+
+                if (
+                    u.protocol === "https:" ||
+                    u.protocol === "http:"
+                ) {
+                    hosts.add(u.origin);
+                }
+            } catch {}
+        };
+
+    for (
+        const item of
+        (items || [])
     ) {
 
-        footballRefreshTimer =
-            setInterval(
-                async () => {
+        // TV / football: item.url hoac item.channels[].url
+        if (item && item.url) {
+            push(item.url);
+        }
 
-                    try {
+        if (item && item.channels) {
+            for (const ch of item.channels) {
+                if (ch && ch.url) {
+                    push(ch.url);
+                }
+            }
+        }
 
-                        // Refresh dinh ky -> force bo qua cache client.
-                        await loadData(true);
-
-                    } catch (e) {
-
-                        console.error(e);
+        // vnfootball: site.matches[].streams[].url
+        if (item && item.matches) {
+            for (const m of item.matches) {
+                for (const s of (m.streams || [])) {
+                    if (s && s.url) {
+                        push(s.url);
                     }
+                }
+            }
+        }
 
-                },
-                1200000
+        if (hosts.size >= 8) {
+            break;
+        }
+    }
+
+    let added = 0;
+
+    for (
+        const origin of
+        hosts
+    ) {
+
+        // Tranh inject trung khi tab duoc tai lai du lieu.
+        if (
+            document.querySelector(
+                'link[rel="preconnect"][href="' + origin + '"]'
+            )
+        ) {
+            continue;
+        }
+
+        if (added >= 8) {
+            break;
+        }
+
+        added++;
+
+        const pre =
+            document.createElement(
+                "link"
             );
+
+        pre.rel =
+            "preconnect";
+
+        pre.href =
+            origin;
+
+        // fetch() cua hls.js la CORS-mode -> can crossorigin moi reuse ket noi.
+        pre.crossOrigin =
+            "anonymous";
+
+        document.head.appendChild(
+            pre
+        );
+
+        const dns =
+            document.createElement(
+                "link"
+            );
+
+        dns.rel =
+            "dns-prefetch";
+
+        dns.href =
+            origin;
+
+        document.head.appendChild(
+            dns
+        );
     }
 }
 
@@ -2885,15 +3344,7 @@ async function loadData(force = false) {
             // Ap dung du lieu da tai (tu fetch hoac tu cache client) vao UI.
             function applyData(data) {
 
-                if (mode === "football") {
-
-                    allData =
-                        data.groups ||
-                        [];
-
-                    renderFootball();
-
-                } else if (mode === "vnfootball") {
+                if (mode === "vnfootball") {
 
                     vnSites =
                         data.sites ||
@@ -2915,6 +3366,14 @@ async function loadData(force = false) {
 
                     renderTV();
                 }
+
+                // Mo san ket noi DNS+TLS toi CDN cua cac kenh dau danh sach
+                // de khi bam kenh thi phat lien tuc (VLC-style, khong cho DNS).
+                warmUpStreamHosts(
+                    mode === "vnfootball"
+                        ? (data.sites || [])
+                        : (data.channels || [])
+                );
             }
 
             // =====================================================
@@ -3737,6 +4196,480 @@ function hideBlv() {
 }
 
 
+// Link khong khoa (khong clearKeys, khong Referer/UA la) thi phat
+// thang duoc nhu VLC -> khong can goi API server.
+// URL thuoc nguon can UA rieng (vmttv/dpdns/tv360/mytvnet/vtvprime/seenow
+// - playlist vmt47) -> phai di qua server.
+const NEEDS_PROXY_URL_RE =
+    /tv360|vmttv|dpdns|mytvnet|vtvprime|seenow\.vn/i;
+
+function channelNeedsServer(channel) {
+
+    const keys =
+        (channel && channel.clearKeys) || {};
+
+    if (Object.keys(keys).length > 0) {
+        return true;
+    }
+
+    const url =
+        String((channel && channel.url) || "");
+
+    // Nguon vmt47 nhieu kenh chi tra stream dung khi duoc goi voi
+    // User-Agent Dalvik; JS khong doi duoc User-Agent -> qua proxy.
+    if (NEEDS_PROXY_URL_RE.test(url)) {
+        return true;
+    }
+
+    // FLV phat duoc truc tiep bang mpegts.js (type "flv"), khong can server.
+
+    const headers =
+        (channel && channel.headers) || {};
+
+    if (headers.Referer || headers.referer) {
+        return true;
+    }
+
+    const ua =
+        String(
+            headers["User-Agent"] ||
+            headers["user-agent"] ||
+            ""
+        );
+
+    // Playlist khai UA khac browser (Dalvik, VThanhTivi, cvmedia,
+    // Mozilla Android Mobile...) -> JS khong set duoc UA do -> qua proxy.
+    if (
+        ua &&
+        (!/mozilla\/5\.0/i.test(ua) ||
+            /android.*mobile/i.test(ua))
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+
+// =====================================================
+// PHAT THANG NHU VLC (KHONG GOI API)
+// =====================================================
+
+function resolveWithTimeout(promise, ms, label) {
+
+    let timer = null;
+
+    const timeout =
+        new Promise((_, reject) => {
+            timer =
+                setTimeout(
+                    () =>
+                        reject(new Error((label || "timeout") + " sau " + ms + "ms")),
+                    ms
+                );
+        });
+
+    // Quan trong: promise goc (hls/mpegts/...) co the treo nen khi sai
+    // loai stream. Gan catch de tranh unhandled rejection, va stopPlayer
+    // truoc moi attempt tiep theo de khong chay ngam 2 player.
+    if (promise && typeof promise.catch === "function") {
+        promise.catch(() => {});
+    }
+
+    return Promise.race([promise, timeout]).finally(
+        () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        }
+    );
+}
+
+
+async function playHlsDirectOnly(url) {
+
+    // Ban truc tiep (VLC-style): fail-fast, KHONG retry dai,
+    // KHONG fallback proxy. Sai loai -> reject nhanh de thu kieu tiep.
+    if (
+        typeof Hls !== "undefined" &&
+        Hls.isSupported()
+    ) {
+        await stopPlayer();
+
+        hlsPlayer = new Hls({
+            enableWorker: true,
+            lowLatencyMode: false,
+            // Vao nhanh hon direct (VLC-style): dung 2 segment sau live edge
+            // thay vi 3; neu lateness vuot thi no nhanh lai max 8 segment.
+            liveSyncDurationCount: 2,
+            liveMaxLatencyDurationCount: 8,
+            maxLiveSyncPlaybackRate: 1.5,
+            backBufferLength: 30,
+            maxBufferLength: 30,
+            maxBufferSize: 60 * 1000 * 1000,
+            maxMaxBufferLength: 60,
+            capLevelToPlayerSize: true,
+            // Truoc khi phat duoc: cho manifest thu vai lan (link VN qua
+            // redirect tinyurl hay hiccup lan dau, VLC van cho) nhung van
+            // fail trong vong vai giay de khong tre qua lau.
+            manifestLoadingMaxRetry: 3,
+            manifestLoadingMaxRetryTimeout: 3000,
+            levelLoadingMaxRetry: 2,
+            levelLoadingMaxRetryTimeout: 4000,
+            fragLoadingMaxRetry: 2,
+            fragLoadingMaxRetryTimeout: 4000,
+            abrEwmaDefaultEstimate: 1500000,
+            abrBandWidthFactor: 0.9,
+            startLevel: -1
+        });
+
+        await new Promise((resolve, reject) => {
+            let done = false;
+            let recoverTries = 0;
+
+            const ok = async () => {
+                if (done) {
+                    return;
+                }
+
+                done = true;
+                populateHlsQualities();
+
+                try {
+                    await video.play();
+                } catch (e) {
+                    console.warn("Autoplay:", e);
+                }
+
+                resolve();
+            };
+
+            const fail = (msg) => {
+                if (done) {
+                    return;
+                }
+
+                done = true;
+                reject(new Error(msg || "Khong phai HLS"));
+            };
+
+            hlsPlayer.on(Hls.Events.MANIFEST_PARSED, ok);
+
+            hlsPlayer.on(
+                Hls.Events.ERROR,
+                (event, data) => {
+                    if (!data || !data.fatal) {
+                        return;
+                    }
+
+                    // Chua phat duoc (chua qua MANIFEST_PARSED) -> khong phai
+                    // HLS hoac link hong -> fail de thu kieu khac.
+                    if (!done) {
+                        fail("HLS: " + (data.details || data.type || "fatal"));
+                        return;
+                    }
+
+                    // Da dang phat: tu phuc hoi nhu VLC (khong den hinh den).
+                    recoverTries++;
+
+                    if (recoverTries > 6) {
+                        console.warn("HLS recover qua gioi han, dung thu lai");
+                        return;
+                    }
+
+                    try {
+                        if (
+                            data.type === Hls.ErrorTypes.NETWORK_ERROR
+                        ) {
+                            if (
+                                data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+                                data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT
+                            ) {
+                                hlsPlayer.loadSource(hlsPlayer.url);
+                            }
+                            hlsPlayer.startLoad();
+                        } else if (
+                            data.type === Hls.ErrorTypes.MEDIA_ERROR
+                        ) {
+                            hlsPlayer.recoverMediaError();
+                        } else {
+                            hlsPlayer.startLoad();
+                        }
+                    } catch (e) {
+                        console.warn("HLS recover error:", e);
+                    }
+                }
+            );
+
+            try {
+                hlsPlayer.attachMedia(video);
+                hlsPlayer.loadSource(url);
+            } catch (e) {
+                fail(e && e.message);
+            }
+        });
+
+        return;
+    }
+
+    if (
+        video.canPlayType(
+            "application/vnd.apple.mpegurl"
+        )
+    ) {
+        await loadVideoSource(url);
+
+        try {
+            await video.play();
+        } catch (e) {
+            console.warn("Autoplay:", e);
+        }
+
+        return;
+    }
+
+    throw new Error("Trinh duyet khong ho tro HLS");
+}
+
+
+async function playMpegTsDirectOnly(url) {
+
+    if (
+        typeof mpegts === "undefined" ||
+        !mpegts.isSupported()
+    ) {
+        throw new Error("Trinh duyet chua ho tro MPEG-TS");
+    }
+
+    await stopPlayer();
+    mpegtsRecoverCount = 0;
+
+    await new Promise((resolve, reject) => {
+        let done = false;
+
+        const ok = () => {
+            if (done) {
+                return;
+            }
+
+            done = true;
+            resolve();
+        };
+
+        const fail = (msg) => {
+            if (done) {
+                return;
+            }
+
+            done = true;
+            reject(new Error(msg || "Khong phai MPEG-TS"));
+        };
+
+        mpegtsPlayer = mpegts.createPlayer(
+            {
+                // Link .flv can type "flv" (mpegts.js la fork cua flv.js,
+                // decode duoc FLV qua HTTP); con lai la mpegts.
+                type: /\.flv(?:\?|$)/i.test(url) ? "flv" : "mpegts",
+                url,
+                isLive: true
+            },
+            {
+                enableWorker: true,
+                enableStashBuffer: false,
+                liveBufferLatencyChasing: true,
+                liveBufferLatencyMaxLatency: 8,
+                liveBufferLatencyMinRemain: 2
+            }
+        );
+
+        mpegtsPlayer.on(
+            mpegts.Events.ERROR,
+            (type, detail) => {
+                // Chua co frame nao ma da ERROR -> sai loai / link hong.
+                if (!video.currentTime) {
+                    fail("MPEGTS: " + type);
+                    return;
+                }
+
+                // Dang phat ma loi nhe -> ke tiep, khong fail attempt.
+                try {
+                    mpegtsPlayer.load();
+                    mpegtsPlayer.play();
+                } catch {}
+            }
+        );
+
+        video.addEventListener("loadeddata", ok, { once: true });
+        video.addEventListener("playing", ok, { once: true });
+
+        try {
+            mpegtsPlayer.attachMediaElement(video);
+            mpegtsPlayer.load();
+            mpegtsPlayer.play();
+        } catch (e) {
+            fail(e && e.message);
+        }
+    });
+}
+
+
+async function playDashDirectOnly(url) {
+
+    currentDashUrl = url;
+    dashRecoveryAttempts = 0;
+
+    if (!shakaPlayer) {
+        await initPlayer();
+    }
+
+    await shakaPlayer.configure({ drm: { clearKeys: {} } });
+    await shakaPlayer.load(url);
+    populateShakaQualities();
+
+    try {
+        await video.play();
+    } catch (e) {
+        console.warn("Autoplay:", e);
+    }
+}
+
+
+async function tryPlayUrlDirect(rawUrl, label) {
+
+    const url = String(rawUrl || "");
+
+    if (!url) {
+        throw new Error("Thieu URL stream");
+    }
+
+    const suffix = label ? " • " + label : "";
+
+    const isFlv = /\.flv(?:\?|$)/i.test(url);
+    const isHlsUrl = isHLS(url);
+    const isTsUrl = /\.ts(?:\?|$)/i.test(url);
+    const isMpdUrl = isMPD(url);
+
+    // FLV: khong thu HLS/video vo ich — vao thang mpegts (type
+    // "flv") de nhanh nhu VLC, tranh mat ~30s lan luot thu sai loai.
+    if (isFlv && typeof mpegts !== "undefined" && mpegts.isSupported()) {
+        try {
+            status.textContent = "⏳ Đang thử FLV" + suffix + "...";
+            await resolveWithTimeout(playMpegTsDirectOnly(url), 12000, "flv");
+            status.textContent = "🔴 Đang phát" + suffix;
+            return "mpegts";
+        } catch (e) {
+            console.warn("DIRECT: khong phai FLV:", e && e.message);
+        }
+
+        await stopPlayer();
+
+        throw new Error("Không phát được luồng FLV");
+    }
+
+    // Dung duoi file de chon DUNG loai player ngay lan dau (nhu VLC):
+    // .m3u8 -> HLS, .ts -> MPEG-TS, .mpd -> DASH; khong lan luot thu
+    // cac loai con lai cho ton thoi gian.
+
+    if (isHlsUrl) {
+        try {
+            status.textContent = "⏳ Đang thử HLS" + suffix + "...";
+            // Cho 15s: HLS là dạng ưu tiên của các luồng bóng đá VN (ttthethao5),
+            // hiccup mạng lần đầu không nên bỏ luồng sống quá sớm như VLC.
+            await resolveWithTimeout(playHlsDirectOnly(url), 15000, "HLS");
+            status.textContent = "🔴 Đang phát" + suffix;
+            return "hls";
+        } catch (e) {
+            console.warn("DIRECT: HLS fail:", e && e.message);
+        }
+
+        await stopPlayer();
+
+        throw new Error("Không phát được luồng HLS");
+    }
+
+    if (isTsUrl && typeof mpegts !== "undefined" && mpegts.isSupported()) {
+        try {
+            status.textContent = "⏳ Đang thử MPEG-TS" + suffix + "...";
+            await resolveWithTimeout(playMpegTsDirectOnly(url), 12000, "mpegts");
+            status.textContent = "🔴 Đang phát" + suffix;
+            return "mpegts";
+        } catch (e) {
+            console.warn("DIRECT: MPEG-TS fail:", e && e.message);
+        }
+
+        await stopPlayer();
+
+        throw new Error("Không phát được luồng MPEG-TS");
+    }
+
+    if (isMpdUrl) {
+        try {
+            status.textContent = "⏳ Đang thử DASH" + suffix + "...";
+            await resolveWithTimeout(playDashDirectOnly(url), 12000, "dash");
+            status.textContent = "🔴 Đang phát" + suffix;
+            return "dash";
+        } catch (e) {
+            console.warn("DIRECT: DASH fail:", e && e.message);
+        }
+
+        await stopPlayer();
+
+        throw new Error("Không phát được luồng DASH");
+    }
+
+    // Khong biet duoi file (link redirect, query lau doi...) -> thu
+    // lan luot nhu truoc.
+
+    try {
+        status.textContent = "⏳ Đang thử HLS" + suffix + "...";
+        await resolveWithTimeout(playHlsDirectOnly(url), 15000, "HLS");
+        status.textContent = "🔴 Đang phát" + suffix;
+        return "hls";
+    } catch (e) {
+        console.warn("DIRECT: khong phai HLS:", e && e.message);
+    }
+
+    await stopPlayer();
+
+    try {
+        status.textContent = "⏳ Đang thử video" + suffix + "...";
+        await resolveWithTimeout(playDirectVideo(url, ""), 8000, "video");
+        status.textContent = "🔴 Đang phát" + suffix;
+        return "video";
+    } catch (e) {
+        console.warn("DIRECT: khong phai video:", e && e.message);
+    }
+
+    await stopPlayer();
+
+    if (typeof mpegts !== "undefined" && mpegts.isSupported()) {
+        try {
+            status.textContent = "⏳ Đang thử MPEG-TS" + suffix + "...";
+            await resolveWithTimeout(playMpegTsDirectOnly(url), 8000, "mpegts");
+            status.textContent = "🔴 Đang phát" + suffix;
+            return "mpegts";
+        } catch (e) {
+            console.warn("DIRECT: khong phai mpegts:", e && e.message);
+        }
+
+        await stopPlayer();
+    }
+
+    try {
+        status.textContent = "⏳ Đang thử DASH" + suffix + "...";
+        await resolveWithTimeout(playDashDirectOnly(url), 10000, "dash");
+        status.textContent = "🔴 Đang phát" + suffix;
+        return "dash";
+    } catch (e) {
+        console.warn("DIRECT: khong phai dash:", e && e.message);
+    }
+
+    await stopPlayer();
+
+    throw new Error("Khong phat truc tiep duoc");
+}
+
+
 // =====================================================
 // PLAY FOOTBALL
 // =====================================================
@@ -3765,6 +4698,25 @@ async function playFootballChannel(
 
 
     try {
+
+        await stopPlayer();
+
+        // Link khong khoa -> phat thang nhu VLC, KHONG goi API server.
+        if (!channelNeedsServer(channel)) {
+            try {
+                await tryPlayUrlDirect(
+                    channel.url,
+                    channel.commentator || "Kênh thể thao"
+                );
+
+                return;
+            } catch (directErr) {
+                console.warn(
+                    "DIRECT hong, chuyen sang API:",
+                    directErr && directErr.message
+                );
+            }
+        }
 
         const cacheKey =
             "football:" + channel.streamId;
@@ -4342,7 +5294,8 @@ let mpegtsRecoverCount = 0;
 function playMpegTsOnce(url) {
     mpegtsPlayer = mpegts.createPlayer(
         {
-            type: "mpegts",
+            // .flv can type "flv" (mpegts.js ho tro FLV qua HTTP).
+            type: /\.flv(?:\?|$)/i.test(url) ? "flv" : "mpegts",
             url,
             isLive: true
         },
@@ -5153,6 +6106,22 @@ async function playTV(channel) {
         console.log("CHANNEL:", channel.name);
         console.log("SOURCE URL:", channel.url);
 
+        await stopPlayer();
+
+        // Link khong khoa -> phat thang nhu VLC, KHONG goi /api/resolve.
+        if (!channelNeedsServer(channel)) {
+            try {
+                await tryPlayUrlDirect(channel.url, channel.name || "");
+
+                return;
+            } catch (directErr) {
+                console.warn(
+                    "DIRECT hong, chuyen sang API:",
+                    directErr && directErr.message
+                );
+            }
+        }
+
         const cacheKey =
             "tv:" + channel.url;
 
@@ -5674,33 +6643,6 @@ function escapeHtml(
     // thanh tua live/VOD) thay vi cho su kien video dau tien.
     updateVideoControls();
 
-
-    footballRefreshTimer =
-        setInterval(
-            async () => {
-
-                if (
-                    mode !==
-                    "football"
-                ) {
-
-                    return;
-                }
-
-
-                try {
-
-                    // Refresh dinh ky -> force bo qua cache client.
-                    await loadData(true);
-
-                } catch (e) {
-
-                    console.error(e);
-                }
-
-            },
-            1200000
-        );
 
 })();
 
