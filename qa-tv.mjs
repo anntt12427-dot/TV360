@@ -14,7 +14,7 @@ export default async function run(page, ui) {
       return l && l.children.length > 0 && !l.querySelector('.skeleton');
     },
     { timeout: 40000 }
-  ).catch(() => {});
+  ).catch(() => { });
 
   await page.waitForTimeout(3000);
 

@@ -106,9 +106,9 @@ const DEFAULT_UA =
 const PLAYLISTS = {
     // Da bo nguon livesport (easport) + tab "The thao quoc te"
     // theo yeu cau: chi giu 2 nguon chinh la tv (vmt47) va
-    // vnfootball (ttthethao5).
+    // vnfootball (ttthethao6).
     tv: "https://tinyurl.com/vmt47",
-    vnfootball: "https://tinyurl.com/ttthethao5"
+    vnfootball: "https://tinyurl.com/ttthethao6"
 };
 
 // ======================================================
@@ -1996,12 +1996,15 @@ function parseM3U(text, playlistType = "") {
                 "baucua"
             ];
 
-            const isBanned = text =>
+                        const isBanned = text =>
                 BANNED_GROUPS.some(keyword =>
                     deaccent(text).includes(keyword)
                 );
 
-            if (isBanned(groupName)) {
+            // Loc banned groups CHI cho playlist TV (vmt47):
+            // bo nhom Ga Vang, CoLa TV, Khan Dai, Bau Cua...
+            // Playlist bong da VN (ttthethao6) giu nguyen toan bo.
+            if (playlistType === "tv" && isBanned(groupName)) {
                 current = null;
                 pendingHeaders = {};
                 continue;
@@ -2018,10 +2021,7 @@ function parseM3U(text, playlistType = "") {
 
             // Loc them theo TEN kenh (mot so kenh khong co
             // group-title dac trung): Gio Vang, Chuoi Chien...
-            // CHI ap dung cho playlist TV (vmt47): ten tran trong
-            // list bong da VN (ttthethao5) chua ten doi/quoc gia
-            // (vd "Viet Nam vs Thai Lan") -> loc theo ten se mat
-            // tran that. Chi loc theo group o list do.
+            // Cung chi ap dung cho playlist TV.
             if (
                 playlistType === "tv" &&
                 (isBanned(name) || isBanned(getAttr("tvg-name")))
@@ -2030,6 +2030,7 @@ function parseM3U(text, playlistType = "") {
                 pendingHeaders = {};
                 continue;
             }
+
 
             current = {
 
@@ -4224,6 +4225,104 @@ app.get("/debug", async (req, res) => {
         });
     }
 });
+// ======================================================
+// API: CHAT CHUNG (luu RAM, khong DB)
+// - GET  /api/chat?after=N : lay tin moi hon N (poll 5s, re)
+// - POST /api/chat         : gui { name, text } (toi da 300 ky tu)
+// Gioi han: 200 tin moi nhat, tin > 24h tu xoa khi day bo dem.
+// ======================================================
+
+const CHAT_MAX = 200;
+
+const chatStore = {
+    list: [],
+    nextId: 1
+};
+
+function chatPush(name, text) {
+
+    chatStore.list.push({
+        id: chatStore.nextId++,
+        name: String(name || "Khách").slice(0, 20),
+        text: String(text || "").slice(0, 300)
+    });
+
+    if (chatStore.list.length > CHAT_MAX) {
+        chatStore.list = chatStore.list.slice(-CHAT_MAX);
+    }
+}
+
+app.get(
+    "/api/chat",
+    (req, res) => {
+
+        const after =
+            parseInt(req.query.after, 10) || 0;
+
+        const messages =
+            chatStore.list.filter(m => m.id > after);
+
+        res.json({
+            ok: true,
+            messages
+        });
+    }
+);
+
+app.post(
+    "/api/chat",
+    (req, res) => {
+
+        let raw = "";
+
+        let tooBig = false;
+
+        req.on("data", chunk => {
+
+            raw += chunk;
+
+            if (raw.length > 4096) {
+
+                tooBig = true;
+
+                req.destroy();
+            }
+        });
+
+        req.on("end", () => {
+
+            if (tooBig) {
+                return;
+            }
+
+            try {
+
+                const body = JSON.parse(raw || "{}");
+
+                const name = String(body.name || "").trim();
+                const text = String(body.text || "").trim();
+
+                if (!text) {
+                    return res.status(400).json({
+                        ok: false,
+                        error: "Tin nhan trong"
+                    });
+                }
+
+                chatPush(name, text);
+
+                res.json({ ok: true });
+
+            } catch {
+                res.status(400).json({
+                    ok: false,
+                    error: "Body khong hop le"
+                });
+            }
+        });
+    }
+);
+
 app.get(
     "/api/health",
     (req, res) => {

@@ -7,7 +7,12 @@
 
 <meta
     name="viewport"
-    content="width=device-width,initial-scale=1"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+
+<meta
+    name="theme-color"
+    content="#0a0c10"
 >
 
 <title>TV360 WEB PLAYER</title>
@@ -20,592 +25,461 @@
 
 
 <style>
+/* ==========================================================
+   TV360 WEB PLAYER - GIAO DIEN 2026 (PC + Mobile)
+   ========================================================== */
+:root {
+    --bg: #0a0c10;
+    --panel: #12151d;
+    --panel-2: #171b26;
+    --card: #151923;
+    --border: rgba(255, 255, 255, .07);
+    --border-2: rgba(255, 255, 255, .12);
+    --text: #f2f4f8;
+    --text-dim: #9aa3b2;
+    --text-mute: #6b7383;
+    --accent: #ff2b3d;
+    --accent-2: #d90d20;
+    --accent-soft: rgba(255, 43, 61, .14);
+    --radius: 14px;
+    --radius-s: 10px;
+    --top-h: 60px;
+}
 
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
-
 
 body {
-
     margin: 0;
-
-    background: #0d0d0d;
-
-    color: #fff;
-
-    font-family:
-        Arial,
-        sans-serif;
-
+    background:
+        radial-gradient(1200px 500px at 80% -10%, rgba(255, 43, 61, .08), transparent 60%),
+        var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     overflow: hidden;
+    /* Ngăn chọn văn bản khi bấm nhanh nhiều lần */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
+button, input, select {
+    font-family: inherit;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .14);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, .22);
+}
 
 /* =====================================================
-   TOP
+   TOP BAR + TABS
 ===================================================== */
 
 .top {
-
-    height: 58px;
-
-    background: #171717;
-
+    height: var(--top-h);
+    background: rgba(15, 18, 26, .92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     display: flex;
-
     align-items: center;
-
-    padding: 8px 14px;
-
-    gap: 8px;
-
-    border-bottom:
-        1px solid #2d2d2d;
+    padding: 8px 16px;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    z-index: 30;
 }
 
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    user-select: none;
+    margin-right: 6px;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ff4d5e, #b00b18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    box-shadow: 0 4px 14px rgba(255, 43, 61, .35);
+}
+
+.brand-name {
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: .4px;
+    white-space: nowrap;
+}
+
+.brand-name span {
+    color: var(--accent);
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid var(--border);
+    padding: 4px;
+    border-radius: 12px;
+}
 
 .tab {
-
     border: 0;
-
-    padding:
-        11px 20px;
-
+    padding: 9px 18px;
     border-radius: 9px;
-
-    background: #292929;
-
-    color: #ddd;
-
+    background: transparent;
+    color: var(--text-dim);
     cursor: pointer;
-
-    font-size: 14px;
-
+    font-size: 13.5px;
     font-weight: 600;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
 }
-
 
 .tab:hover {
-
-    background: #353535;
+    color: var(--text);
+    background: rgba(255, 255, 255, .06);
 }
-
 
 .tab.active {
-
-    background: #e50914;
-
+    background: linear-gradient(135deg, #ff4d5e, #d90d20);
     color: #fff;
+    box-shadow: 0 3px 12px rgba(255, 43, 61, .35);
 }
 
-
 /* =====================================================
-   MAIN
+   MAIN LAYOUT
 ===================================================== */
 
 .main {
-
-    height:
-        calc(100vh - 58px);
-
+    height: calc(100vh - var(--top-h));
     display: flex;
 }
 
-
 /* =====================================================
-   LEFT
+   LEFT: DANH SACH
 ===================================================== */
 
 .left {
-
-    width: 390px;
-
+    width: 400px;
     flex-shrink: 0;
-
-    background: #111;
-
-    border-right:
-        1px solid #303030;
-
+    background: var(--panel);
+    border-right: 1px solid var(--border);
     overflow-y: auto;
-
-    padding: 12px;
+    padding: 14px;
 }
-
 
 .left::-webkit-scrollbar {
-
-    width: 7px;
+    width: 6px;
 }
-
 
 .left::-webkit-scrollbar-thumb {
-
-    background: #444;
-
-    border-radius: 10px;
+    background: rgba(255, 255, 255, .12);
 }
 
-
-/* =====================================================
-   FOOTBALL FILTER
-===================================================== */
-
+/* Filter hang (legacy football) */
 .football-filters {
-
     display: flex;
-
     gap: 7px;
-
     margin-bottom: 12px;
 }
 
-
 .filter-btn {
-
-    border: 0;
-
-    border-radius: 7px;
-
-    padding:
-        8px 11px;
-
-    background: #282828;
-
-    color: #bbb;
-
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 12px;
+    background: var(--panel-2);
+    color: var(--text-dim);
     cursor: pointer;
-
     font-size: 12px;
-
     font-weight: 600;
 }
 
-
 .filter-btn.active {
-
-    background:
-        #e50914;
-
-    color: #fff;
+    background: var(--accent-soft);
+    border-color: rgba(255, 43, 61, .4);
+    color: #ff8a94;
 }
 
-
-/* =====================================================
-   SOURCE GROUPS
-===================================================== */
-
+/* Nguon (chips) */
 .groups {
-
     display: flex;
-
     flex-wrap: wrap;
-
-    gap: 6px;
-
-    margin-bottom: 12px;
+    gap: 7px;
+    margin-bottom: 14px;
 }
-
 
 .group {
-
-    background: #242424;
-
-    border:
-        1px solid #333;
-
-    color: #ccc;
-
-    border-radius: 16px;
-
-    padding:
-        6px 10px;
-
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 18px;
+    padding: 7px 12px;
     cursor: pointer;
-
-    font-size: 11px;
-
+    font-size: 11.5px;
+    font-weight: 600;
     display: inline-flex;
-
     align-items: center;
-
     gap: 6px;
-
-    transition:
-        background .15s,
-        transform .1s;
+    transition: background .15s, color .15s, border-color .15s, transform .1s;
 }
-
 
 .group:hover {
-
-    background: #303030;
-
-    transform:
-        translateY(-1px);
+    background: rgba(255, 255, 255, .1);
+    color: var(--text);
+    transform: translateY(-1px);
 }
-
 
 .group.active {
-
-    background:
-        #e50914;
-
+    background: linear-gradient(135deg, #ff4d5e, #d90d20);
     color: #fff;
-
-    border-color:
-        #e50914;
+    border-color: transparent;
+    box-shadow: 0 3px 10px rgba(255, 43, 61, .3);
 }
 
-
 .source-logo {
-
     width: 18px;
-
     height: 18px;
-
     object-fit: contain;
-
     border-radius: 4px;
 }
 
-
-/* =====================================================
-   MATCH
-===================================================== */
-
+/* Card tran (football quoc te - legacy) */
 .match {
-
-    background: #191919;
-
-    border:
-        1px solid #303030;
-
-    border-radius: 10px;
-
-    padding: 13px;
-
-    margin-bottom: 9px;
-
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
     cursor: pointer;
-
-    transition:
-        background .15s,
-        border-color .15s,
-        transform .1s;
+    transition: background .15s, border-color .15s, transform .12s;
 }
-
 
 .match:hover {
-
-    background: #222;
-
-    border-color: #555;
-
-    transform:
-        translateY(-1px);
+    background: #1a1f2c;
+    border-color: var(--border-2);
+    transform: translateY(-1px);
 }
-
 
 .match.selected {
-
-    border-color:
-        #e50914;
-
-    background: #202020;
+    border-color: rgba(255, 43, 61, .65);
+    background: #1a1620;
+    box-shadow: 0 0 0 1px rgba(255, 43, 61, .25), 0 6px 18px rgba(255, 43, 61, .08);
 }
 
-
 .match-header {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     margin-bottom: 8px;
 }
 
-
 .match-time {
-
-    color: #999;
-
+    color: var(--text-dim);
     font-size: 12px;
-
-    font-weight: 600;
+    font-weight: 700;
 }
-
 
 .live-badge {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 5px;
-
-    color: #ff3945;
-
+    color: #ff5563;
     font-size: 11px;
-
-    font-weight: bold;
+    font-weight: 800;
 }
-
 
 .live-dot {
-
     width: 7px;
-
     height: 7px;
-
     border-radius: 50%;
-
-    background:
-        #ff2638;
-
-    box-shadow:
-        0 0 7px #ff2638;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: livePulse 1.6s ease-in-out infinite;
 }
 
+@keyframes livePulse {
+
+    0%, 100% { opacity: 1; }
+    50% { opacity: .35; }
+}
 
 .match-name {
-
-    font-size: 16px;
-
-    line-height: 1.35;
-
+    font-size: 15.5px;
+    line-height: 1.4;
     font-weight: 700;
-
-    color: #fff;
-
+    color: var(--text);
     margin-bottom: 9px;
 }
-
 
 .match-source {
-
-    color: #888;
-
-    font-size: 11px;
-
+    color: var(--text-mute);
+    font-size: 11.5px;
     margin-bottom: 9px;
 }
-
 
 .match-footer {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
-    color: #888;
-
-    font-size: 11px;
+    color: var(--text-mute);
+    font-size: 11.5px;
 }
-
 
 .match-blv-count {
-
-    color: #aaa;
+    color: var(--text-dim);
 }
-
 
 .watch-text {
-
-    color:
-        #e50914;
-
-    font-weight: bold;
+    color: var(--accent);
+    font-weight: 800;
 }
 
-/* =====================================================
-   BÓNG ĐÁ VN: CARD TRẬN
-===================================================== */
-
+/* Card tran (bong da VN) */
 .vn-match-card {
-
     display: flex;
-
     align-items: center;
-
     gap: 12px;
-
-    padding: 12px;
-
-    margin-bottom: 9px;
-
-    background: #191919;
-
-    border: 1px solid #303030;
-
-    border-radius: 10px;
-
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     cursor: pointer;
-
-    transition:
-        background .15s,
-        border-color .15s,
-        transform .1s;
+    transition: background .15s, border-color .15s, transform .12s;
 }
 
 .vn-match-card:hover {
+    background: #1a1f2c;
+    border-color: var(--border-2);
+    transform: translateY(-1px);
+}
 
-    background: #222;
-
-    border-color: #555;
-
-    transform:
-        translateY(-1px);
+.vn-match-card.selected {
+    border-color: rgba(255, 43, 61, .65);
+    background: #1a1620;
 }
 
 .vn-match-logo {
-
     width: 46px;
-
     height: 46px;
-
     object-fit: contain;
-
-    background: #222;
-
-    border-radius: 8px;
-
+    background: rgba(255, 255, 255, .05);
+    border-radius: 10px;
     flex-shrink: 0;
+    padding: 4px;
 }
 
 .vn-match-body {
-
     min-width: 0;
-
     flex: 1;
 }
 
 .vn-match-head {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     margin-bottom: 5px;
 }
 
 .vn-match-time {
-
-    color: #999;
-
+    color: var(--text-dim);
     font-size: 12px;
-
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .vn-match-title {
-
-    font-size: 15px;
-
+    font-size: 14.5px;
     font-weight: 700;
-
-    color: #fff;
-
-    line-height: 1.35;
+    color: var(--text);
+    line-height: 1.4;
 }
 
 .vn-match-foot {
-
     margin-top: 6px;
-
-    color: #888;
-
-    font-size: 11px;
+    color: var(--text-mute);
+    font-size: 11.5px;
 }
 
-/* =====================================================
-   TV
-===================================================== */
-
+/* Kenh TV */
 .channel {
-
     display: flex;
-
     align-items: center;
-
-    gap: 10px;
-
-    padding: 9px;
-
-    margin-bottom: 5px;
-
-    border-radius: 8px;
-
+    gap: 11px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-s);
     cursor: pointer;
-
-    background: #191919;
-
-    border:
-        1px solid #292929;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: background .15s, border-color .15s;
 }
-
 
 .channel:hover {
-
-    background: #252525;
+    background: #1c212e;
+    border-color: var(--border-2);
 }
-
 
 .logo {
-
-    width: 38px;
-
-    height: 38px;
-
+    width: 40px;
+    height: 40px;
     object-fit: contain;
-
-    background: #222;
-
-    border-radius: 6px;
+    background: rgba(255, 255, 255, .05);
+    border-radius: 9px;
+    padding: 3px;
+    flex-shrink: 0;
 }
 
-/* Badge chu cai dau cho site khong co logo rieng */
 .logo-badge {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-weight: 700;
+    width: 40px;
+    height: 40px;
+    font-weight: 800;
     font-size: 17px;
     color: #fff;
-    background: linear-gradient(135deg, #d32f2f, #8b0000);
+    background: linear-gradient(135deg, #ff4d5e, #8e0d18);
+    border-radius: 9px;
 }
 
-
 .channel-name {
-    font-size: 13px;
+    font-size: 13.5px;
+    font-weight: 600;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-/* =====================================================
-   SKELETON (dang tai)
-===================================================== */
-
+/* Skeleton */
 .skeleton {
     pointer-events: none;
 }
 
 .sk-logo {
-    width: 38px;
-    height: 38px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
     flex-shrink: 0;
-    background: #262626;
+    background: rgba(255, 255, 255, .07);
     animation: sk-pulse 1.4s ease-in-out infinite;
 }
 
@@ -613,699 +487,567 @@ body {
     height: 13px;
     flex: 1;
     max-width: 60%;
-    border-radius: 4px;
-    background: #262626;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, .07);
     animation: sk-pulse 1.4s ease-in-out infinite;
 }
 
 @keyframes sk-pulse {
 
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .45;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
 }
 
 /* =====================================================
-   RIGHT
+   RIGHT + PLAYER
 ===================================================== */
 
 .right {
-
     flex: 1;
-
     min-width: 0;
-
-    background: #000;
-
+    background: var(--bg);
     display: flex;
-
     flex-direction: column;
-
     overflow-y: auto;
 }
 
-
-/* =====================================================
-   PLAYER
-===================================================== */
-
 .player-box {
-
     width: 100%;
-
-    aspect-ratio: 16 / 9;
-
-    max-height: 72vh;
-
     background: #000;
-
     position: relative;
-
     flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    /* Giữ tỉ lệ 16:9 mặc định nhưng cho phép thay đổi */
+    aspect-ratio: 16 / 9;
 }
 
+.video-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
 
 video {
-
-    width: 100%;
-
-    height: 100%;
-
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     display: block;
-
-    background: #000;
+    object-fit: contain; /* Đảm bảo không bị dải đen nếu khung bọc vừa khít */
 }
 
 .player-actions {
-
     position: absolute;
-
     right: 0;
-
     bottom: 0;
-
     left: 0;
-
     z-index: 2;
-
     padding: 34px 12px 10px;
-
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, .9),
-        rgba(0, 0, 0, 0)
-    );
-
-    opacity: 1;
-
-    transition: opacity .22s ease;
+    background: linear-gradient(transparent, rgba(5, 6, 10, .82));
+    transition: opacity .25s ease, visibility .25s ease;
 }
 
+/* Tu dong an thanh dieu khien khi dang phat + khong tuong tac */
 .player-box.controls-hidden .player-actions {
-
     opacity: 0;
-
+    visibility: hidden;
     pointer-events: none;
 }
 
-/* Thanh tua: khung .progress-bar giu vi tri + ve nen/fill, input range
-   nam tren cung de nhan thao tac keo (vung cham cao 22-28px).
-   Fix "roi" khoi player: khong de margin am, width tinh theo padding
-   cua .player-actions (left/right 12px desktop, 8px mobile). */
+.player-box.controls-hidden {
+    cursor: none;
+}
+
 .progress-bar {
-
     position: relative;
-
-    display: block;
-
-    width: 100%;
-
     height: 22px;
-
-    margin: 0 0 4px;
-
-    padding: 0;
-
-    touch-action: none;
+    margin-bottom: 4px;
 }
 
-/* Nen thanh tua (phan chua phat) */
-.progress-bar::before {
-
-    content: "";
-
-    position: absolute;
-
-    top: 50%;
-
-    right: 0;
-
-    left: 0;
-
-    height: 5px;
-
-    border-radius: 3px;
-
-    transform: translateY(-50%);
-
-    background: rgba(255, 255, 255, .25);
-
-    pointer-events: none;
-}
-
-/* Phan da phat */
 .progress-fill {
-
     position: absolute;
-
     top: 50%;
-
     left: 0;
-
-    width: 0;
-
-    height: 5px;
-
-    border-radius: 3px;
-
     transform: translateY(-50%);
-
-    background: #e50914;
-
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #ff4d5e, #d90d20);
     pointer-events: none;
-
-    transition: width .2s linear;
-}
-
-/* Live khong co cua so tua (DVR) -> thanh tua mo di */
-.progress-bar.disabled .progress-fill {
-
-    background: #777;
+    z-index: 1;
 }
 
 .progress-track {
-
     position: absolute;
-
     top: 0;
-
     right: 0;
-
     left: 0;
-
     display: block;
-
     box-sizing: border-box;
-
     width: 100%;
-
     height: 22px;
-
     margin: 0;
-
     padding: 0;
-
     border: 0;
-
     background: transparent;
-
     -webkit-appearance: none;
-
     appearance: none;
-
-    accent-color: #e50914;
-
+    accent-color: var(--accent);
     cursor: pointer;
-
     touch-action: none;
 }
 
 .progress-track:disabled {
-
     cursor: default;
 }
 
 .progress-track::-webkit-slider-runnable-track {
-
     height: 22px;
-
     margin: 0;
-
     padding: 0;
-
     background: transparent;
 }
 
 .progress-track::-webkit-slider-thumb {
-
     width: 14px;
-
     height: 14px;
-
     margin-top: 4px;
-
-    margin-right: 0;
-
-    margin-left: 0;
-
     border: 2px solid #fff;
-
     border-radius: 50%;
-
-    background: #e50914;
-
+    background: var(--accent);
     box-shadow: 0 0 5px rgba(0, 0, 0, .7);
-
     -webkit-appearance: none;
-
     appearance: none;
 }
 
 .progress-track::-moz-range-track {
-
     height: 22px;
-
     border: 0;
-
     background: transparent;
 }
 
 .progress-track::-moz-range-thumb {
-
     width: 12px;
-
     height: 12px;
-
     border: 2px solid #fff;
-
     border-radius: 50%;
-
-    background: #e50914;
-
+    background: var(--accent);
     box-shadow: 0 0 5px rgba(0, 0, 0, .7);
 }
 
 .control-row {
-
     display: flex;
-
     align-items: center;
-
     gap: 8px;
-
     width: 100%;
-
     min-width: 0;
-
     margin: 0;
-
     padding: 0;
 }
 
 .player-action,
 .speed-select,
 .quality-select {
-
     flex-shrink: 0;
-
     height: 32px;
-
     border: 0;
-
-    border-radius: 8px;
-
-    background: rgba(20, 20, 20, .72);
-
-    color: #ddd;
-
+    border-radius: 9px;
+    background: rgba(22, 26, 36, .78);
+    color: #dfe3ea;
     padding: 0 10px;
-
     cursor: pointer;
-
     font-size: 12px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: background .15s;
 }
 
 .player-action:hover,
 .speed-select:hover {
-
-    background: rgba(70, 70, 70, .9);
+    background: rgba(58, 66, 84, .95);
 }
 
 .quality-select {
-
     max-width: 82px;
 }
 
 .icon-button {
-
     width: 34px;
-
     min-width: 34px;
-
     padding: 0;
-
     font-size: 16px;
 }
 
 .time-label {
-
     flex-shrink: 0;
-
     min-width: 0;
-
-    color: #eee;
-
+    color: #e8ebf2;
     font-size: 11px;
-
     font-variant-numeric: tabular-nums;
-
     white-space: nowrap;
 }
 
 .control-spacer {
-
     flex: 1 1 auto;
-
     min-width: 4px;
 }
 
-/* Cum am luong: nut loa + thanh truot gon trong 1 khoi, khong de
-   input range thua 2 dau (reset padding/margin mac dinh cua input).
-   Mobile: cum nay la neo cho popup volume (position relative o desktop
-   khong can, nhung can tren mobile de popup bam theo). */
+/* Cum am luong */
 .volume-group {
-
     position: relative;
-
     display: flex;
-
     align-items: center;
-
     flex-shrink: 0;
-
     gap: 0;
-
     height: 32px;
-
-    border-radius: 8px;
-
-    background: rgba(20, 20, 20, .72);
-
+    border-radius: 9px;
+    background: rgba(22, 26, 36, .78);
     padding: 0 8px 0 2px;
 }
 
 .volume-group .player-action {
-
     background: transparent;
-
     height: 30px;
 }
 
 .volume-range {
-
     display: block;
-
     box-sizing: border-box;
-
     width: 64px;
-
     height: 20px;
-
     margin: 0;
-
     padding: 0;
-
     border: 0;
-
     background: transparent;
-
     accent-color: #fff;
-
     cursor: pointer;
-
     -webkit-appearance: none;
-
     appearance: none;
 }
 
 .volume-range::-webkit-slider-runnable-track {
-
     height: 4px;
-
     border-radius: 2px;
-
     background: rgba(255, 255, 255, .35);
 }
 
 .volume-range::-webkit-slider-thumb {
-
     width: 12px;
-
     height: 12px;
-
     margin-top: -4px;
-
     border: 0;
-
     border-radius: 50%;
-
     background: #fff;
-
     -webkit-appearance: none;
-
     appearance: none;
 }
 
 .volume-range::-moz-range-track {
-
     height: 4px;
-
     border-radius: 2px;
-
     background: rgba(255, 255, 255, .35);
 }
 
 .volume-range::-moz-range-thumb {
-
     width: 12px;
-
     height: 12px;
-
     border: 0;
-
     border-radius: 50%;
-
     background: #fff;
 }
 
 .player-action.live {
-
     color: #ff5360;
-
-    font-weight: 700;
+    font-weight: 800;
 }
 
-
-/* Toan man hinh: khung player phu kin man hinh, bo gioi han 16/9 */
+/* Toan man hinh */
 .player-box:fullscreen {
-
     width: 100vw;
-
     height: 100vh;
-
     max-height: none;
-
     aspect-ratio: auto;
 }
 
 .player-box:-webkit-full-screen {
-
     width: 100vw;
-
     height: 100vh;
-
     max-height: none;
-
     aspect-ratio: auto;
 }
 
-
 /* =====================================================
-   INFO
+   INFO + BLV + ERROR
 ===================================================== */
 
 .info {
-
-    padding:
-        15px 20px;
-
-    border-top:
-        1px solid #242424;
-
-    background:
-        #0d0d0d;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
 }
-
 
 .title {
-
     font-size: 20px;
-
-    font-weight: bold;
-
+    font-weight: 800;
     margin-bottom: 5px;
+    line-height: 1.35;
 }
 
-
 .status {
-
-    color: #999;
-
+    color: var(--text-dim);
     font-size: 13px;
 }
 
-
-/* =====================================================
-   SOURCE INFO
-===================================================== */
-
 .current-source {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 7px;
-
-    margin-top: 8px;
-
-    padding:
-        5px 9px;
-
-    border-radius: 15px;
-
-    background: #202020;
-
-    color: #bbb;
-
-    font-size: 11px;
+    margin-top: 9px;
+    padding: 6px 11px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11.5px;
+    font-weight: 600;
 }
 
-
 .current-source img {
-
     width: 17px;
-
     height: 17px;
-
     object-fit: contain;
-
     border-radius: 4px;
 }
 
-
-/* =====================================================
-   BLV
-===================================================== */
-
 .blv-panel {
-
     margin-top: 15px;
-
     padding-top: 13px;
-
-    border-top:
-        1px solid #292929;
+    border-top: 1px solid var(--border);
 }
 
-
 .blv-label {
-
     font-size: 12px;
-
-    color: #888;
-
+    color: var(--text-dim);
+    font-weight: 700;
     margin-bottom: 8px;
 }
 
-
 .blv-buttons {
-
     display: flex;
-
     flex-wrap: wrap;
-
     gap: 7px;
 }
 
-
 .blv-button {
-
-    border:
-        1px solid #3a3a3a;
-
-    background: #222;
-
-    color: #ddd;
-
-    padding:
-        8px 12px;
-
-    border-radius: 7px;
-
+    border: 1px solid var(--border-2);
+    background: var(--panel-2);
+    color: #dfe3ea;
+    padding: 9px 13px;
+    border-radius: 9px;
     cursor: pointer;
-
     font-size: 12px;
+    font-weight: 600;
+    transition: background .15s, border-color .15s;
 }
-
 
 .blv-button:hover {
-
-    background: #333;
-
-    border-color: #555;
+    background: #242a38;
+    border-color: rgba(255, 255, 255, .22);
 }
 
-
 .blv-button.active {
-
-    background:
-        #e50914;
-
-    border-color:
-        #e50914;
-
+    background: linear-gradient(135deg, #ff4d5e, #d90d20);
+    border-color: transparent;
     color: #fff;
 }
 
-
-/* =====================================================
-   ERROR
-===================================================== */
-
 .error {
-
-    color:
-        #ff4545;
-
+    color: #ff5a64;
     white-space: pre-wrap;
-
-    font-family:
-        monospace;
-
+    font-family: ui-monospace, Consolas, monospace;
     font-size: 12px;
-
     margin-top: 10px;
 }
 
-
-/* =====================================================
-   EMPTY
-===================================================== */
-
 .empty {
-
-    padding:
-        30px 10px;
-
+    padding: 34px 10px;
     text-align: center;
-
-    color: #777;
-
+    color: var(--text-mute);
     font-size: 13px;
 }
 
+/* =====================================================
+   CHAT CHUNG
+===================================================== */
+
+.chat-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 60;
+    width: 54px;
+    height: 54px;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 23px;
+    color: #fff;
+    background: linear-gradient(135deg, #ff4d5e, #b00b18);
+    box-shadow: 0 8px 24px rgba(255, 43, 61, .4);
+    transition: transform .15s;
+}
+
+.chat-fab:hover {
+    transform: scale(1.06);
+}
+
+.chat-panel {
+    position: fixed;
+    right: 18px;
+    bottom: 84px;
+    z-index: 61;
+    width: 340px;
+    height: min(480px, calc(100vh - 170px));
+    display: none;
+    flex-direction: column;
+    background: rgba(17, 20, 30, .97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-2);
+    border-radius: 16px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .55);
+    overflow: hidden;
+}
+
+.chat-panel.open {
+    display: flex;
+}
+
+.chat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, .03);
+}
+
+.chat-head-title {
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.chat-head-title small {
+    display: block;
+    color: var(--text-mute);
+    font-weight: 500;
+    font-size: 10.5px;
+    margin-top: 2px;
+}
+
+#chatNameInput {
+    width: 110px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 11.5px;
+    outline: none;
+}
+
+#chatNameInput:focus {
+    border-color: rgba(255, 43, 61, .5);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.chat-msg {
+    max-width: 88%;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 7px 11px;
+    font-size: 13px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.chat-msg b {
+    display: block;
+    font-size: 11px;
+    color: #ff8a94;
+    margin-bottom: 2px;
+}
+
+.chat-msg.self {
+    align-self: flex-end;
+    background: linear-gradient(135deg, rgba(255, 77, 94, .25), rgba(217, 13, 32, .18));
+    border-color: rgba(255, 43, 61, .35);
+}
+
+.chat-msg.self b {
+    color: #ffb3ba;
+}
+
+.chat-empty {
+    color: var(--text-mute);
+    font-size: 12px;
+    text-align: center;
+    padding: 18px 8px;
+}
+
+.chat-form {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--border);
+    background: rgba(255, 255, 255, .03);
+}
+
+#chatInput {
+    flex: 1;
+    min-width: 0;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    outline: none;
+}
+
+#chatInput:focus {
+    border-color: rgba(255, 43, 61, .5);
+}
+
+.chat-send {
+    border: 0;
+    border-radius: 10px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff4d5e, #d90d20);
+    box-shadow: 0 4px 12px rgba(255, 43, 61, .3);
+}
 
 /* =====================================================
    MOBILE
 ===================================================== */
 
-@media(max-width:800px) {
+@media(max-width: 800px) {
 
     body {
         overflow: auto;
@@ -1316,17 +1058,29 @@ video {
         height: auto;
         min-height: 56px;
         padding: 8px 10px;
-        gap: 6px;
+        gap: 8px;
         position: sticky;
         top: 0;
-        z-index: 10;
+    }
+
+    .brand-name {
+        display: none;
+    }
+
+    .brand {
+        margin-right: 0;
+    }
+
+    .tabs {
+        flex: 1;
+        gap: 4px;
     }
 
     .tab {
         flex: 1;
-        padding: 12px 8px;
-        font-size: 13px;
-        border-radius: 8px;
+        padding: 11px 6px;
+        font-size: 12.5px;
+        border-radius: 9px;
         min-height: 44px;
     }
 
@@ -1343,278 +1097,170 @@ video {
 
     .player-box {
         max-height: none;
-        aspect-ratio: 16 / 9;
+        aspect-ratio: auto;
         z-index: 9;
-        background: #000;
+        position: relative;
+        height: 100vh;
     }
 
     .player-actions {
-
         padding: 16px 8px 8px;
-
-        /* Giu overflow-x hidden de hang nut khong tran, nhung overflow-y
-           phai visible de popup volume doc (bottom: 38px) khong bi cat. */
         overflow-x: hidden;
-
         overflow-y: visible;
     }
 
-    /* Hang 1: thanh tua. Hang 2: cum nut gon 1 hang.
-       Khong de margin am day thanh tua "roi" xuong duoi player. */
     .progress-bar {
-
         height: 28px;
-
         margin: 0 0 4px;
     }
 
     .progress-track {
-
         height: 28px;
     }
 
     .progress-track::-webkit-slider-runnable-track {
-
         height: 28px;
     }
 
     .progress-track::-webkit-slider-thumb {
-
         width: 16px;
-
         height: 16px;
-
         margin-top: 6px;
     }
 
-    /* Cum nut: gon 1 hang, khong cuon ngang, khong xuong dong.
-       Thu tu uu tien tren mobile: play -> tua lui/tien -> time ->
-       loa -> live -> fullscreen. Toc do + chat luong an bot (van
-       chinh duoc khi mo fullscreen hoac xoay ngang). */
     .control-row {
-
         gap: 4px;
-
         flex-wrap: nowrap;
-
         overflow: hidden;
-
         padding-bottom: 0;
     }
 
     .control-row > * {
-
         flex-shrink: 1;
-
         min-width: 0;
     }
 
     .control-row > .control-spacer {
-
         flex: 1 1 auto;
-
         min-width: 2px;
     }
 
     #speedSelect,
     #qualitySelect {
-
         display: none;
     }
 
     .player-action,
     .speed-select,
     .quality-select {
-
-        height: 30px;
-
-        padding: 0 8px;
-
-        font-size: 11px;
+        height: 34px;
+        padding: 0 9px;
+        font-size: 11.5px;
     }
 
     .icon-button {
-
-        width: 30px;
-
-        min-width: 30px;
-
-        flex-shrink: 0;
+        width: 34px;
+        min-width: 34px;
     }
 
     #playButton,
     #muteButton,
     #liveButton,
-    #fullscreenButton {
-
-        flex-shrink: 0;
-    }
-
-    /* Mobile: an thanh truot ngang de hang nut gon. Muon chinh volume:
-       bam nut loa 1 cai -> popup volume doc hien ra ngay tren nut loa
-       (giong YouTube), keo len/xuong de chinh. Bam loa lan nua -> tat
-       tieng nhu cu. */
-    .volume-group {
-
-        background: transparent;
-
-        padding: 0;
-
-        height: 30px;
-
-        position: relative;
-
-        overflow: visible;
-    }
-
-    .volume-group .volume-range {
-
-        position: absolute;
-
-        /* Hop input 110x30 xoay -90 do quanh tam: hien thi doc 30x110,
-           tam trung voi nut loa (nut rong 30px, canh phai group). Xoay
-           -90 do thi dau min (trai) xuong duoi, dau max (phai) len tren:
-           keo len = to dan, giong YouTube. */
-        right: -40px;
-
-        bottom: 96px;
-
-        display: none;
-
-        width: 110px;
-
-        height: 30px;
-
-        margin: 0;
-
-        padding: 0 10px;
-
-        border-radius: 8px;
-
-        background: rgba(10, 10, 10, .92);
-
-        box-shadow: 0 4px 14px rgba(0, 0, 0, .6);
-
-        transform: rotate(-90deg);
-
-        touch-action: none;
-    }
-
-    .volume-group .volume-range::-webkit-slider-runnable-track {
-
-        height: 4px;
-
-        border-radius: 2px;
-
-        background: rgba(255, 255, 255, .35);
-    }
-
-    .volume-group .volume-range::-webkit-slider-thumb {
-
-        width: 14px;
-
-        height: 14px;
-
-        margin-top: -5px;
-
-        border: 0;
-
-        border-radius: 50%;
-
-        background: #fff;
-
-        -webkit-appearance: none;
-
-        appearance: none;
-    }
-
-    .volume-group .volume-range::-moz-range-track {
-
-        height: 4px;
-
-        border-radius: 2px;
-
-        background: rgba(255, 255, 255, .35);
-    }
-
-    .volume-group .volume-range::-moz-range-thumb {
-
-        width: 14px;
-
-        height: 14px;
-
-        border: 0;
-
-        border-radius: 50%;
-
-        background: #fff;
-    }
-
-    .volume-group.volume-open .volume-range {
-
-        display: block;
-    }
-
-    .volume-group .player-action {
-
-        background: rgba(20, 20, 20, .72);
-
-        width: 30px;
-
-        min-width: 30px;
-    }
-
+    #fullscreenButton,
     #rewindButton,
     #forwardButton {
-
         flex-shrink: 0;
     }
 
     .time-label {
-
         flex-shrink: 1;
-
         font-size: 10px;
-
         max-width: 92px;
-
         overflow: hidden;
-
         text-overflow: ellipsis;
     }
 
-    /* Man rat hep (<= 360px): an tiep 2 nut tua de hang nut khong
-       tran, van tua duoc bang cach keo thanh tua phia tren. */
-    @media (max-width: 360px) {
-
-        #rewindButton,
-        #forwardButton {
-
-            display: none;
-        }
+    /* Volume popup doc nhu YouTube */
+    .volume-group {
+        background: transparent;
+        padding: 0;
+        height: 34px;
+        position: relative;
+        overflow: visible;
     }
 
+    .volume-group .volume-range {
+        position: absolute;
+        right: -40px;
+        bottom: 100px;
+        display: none;
+        width: 110px;
+        height: 30px;
+        margin: 0;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: rgba(10, 12, 18, .95);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .6);
+        transform: rotate(-90deg);
+        touch-action: none;
+    }
+
+    .volume-group .volume-range::-webkit-slider-runnable-track {
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, .35);
+    }
+
+    .volume-group .volume-range::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
+        margin-top: -5px;
+        border: 0;
+        border-radius: 50%;
+        background: #fff;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .volume-group .volume-range::-moz-range-track {
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, .35);
+    }
+
+    .volume-group .volume-range::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        border: 0;
+        border-radius: 50%;
+        background: #fff;
+    }
+
+    .volume-group.volume-open .volume-range {
+        display: block;
+    }
+
+    .volume-group .player-action {
+        background: rgba(22, 26, 36, .78);
+        width: 34px;
+        min-width: 34px;
+    }
+
+    /* Danh sach: phia duoi player, cuon trong khung rieng */
     .left {
         order: 2;
         width: 100%;
-        /* Khung danh sach co dinh chieu cao: cuộn bên trong khung,
-           trang không dài quá vài trăm kênh. */
         height: calc(100vh - 60px);
         max-height: calc(100vh - 60px);
         overflow-y: auto;
         border-right: 0;
-        border-top: 1px solid #303030;
+        border-top: 1px solid var(--border);
         padding: 10px;
         -webkit-overflow-scrolling: touch;
     }
 
     .left::-webkit-scrollbar {
         width: 4px;
-    }
-
-    .left::-webkit-scrollbar-thumb {
-        background: #444;
-        border-radius: 10px;
     }
 
     .groups {
@@ -1631,17 +1277,9 @@ video {
         min-height: 40px;
     }
 
-    .match, .channel {
-        padding: 14px 12px;
+    .match, .channel, .vn-match-card {
+        padding: 13px 12px;
         min-height: 56px;
-    }
-
-    /* Danh sách nằm trong khung cuộn riêng, sticky không cần nữa.
-       Nhung PHAI giu relative: .player-actions (position:absolute) lay
-       .player-box lam goc. Neu de static thi thanh cong cu se "roi"
-       xuong day man hinh, de len danh sach kenh -> bam nham play/tua. */
-    .player-box {
-        position: relative;
     }
 
     .match-name {
@@ -1668,7 +1306,6 @@ video {
 
     .title {
         font-size: 17px;
-        line-height: 1.4;
     }
 
     .time-label {
@@ -1676,19 +1313,40 @@ video {
         font-size: 10px;
     }
 
-    .volume-range {
-        display: none;
-    }
-
     .speed-select {
         padding: 0 5px;
         font-size: 12px;
     }
 
+    /* Chat: sheet ngang man hinh */
+    .chat-panel {
+        left: 10px;
+        right: 10px;
+        width: auto;
+        bottom: 76px;
+        height: min(60vh, 440px);
+    }
+
+    .chat-fab {
+        width: 50px;
+        height: 50px;
+        right: 14px;
+        bottom: 14px;
+        font-size: 21px;
+    }
+
+    @media (max-width: 360px) {
+
+        #rewindButton,
+        #forwardButton {
+            display: none;
+        }
+    }
 }
 
-/* Man hinh rat nho: thu gon kich thuoc nhung KHONG an nut tua/thanh tua */
-@media(max-width:400px) {
+/* Man hinh rat nho */
+@media(max-width: 400px) {
+
     .player-actions {
         padding: 14px 6px 6px;
     }
@@ -1700,15 +1358,15 @@ video {
     .player-action,
     .speed-select,
     .quality-select {
-        height: 38px;
-        min-width: 38px;
+        height: 36px;
+        min-width: 36px;
         font-size: 12px;
     }
 
     .icon-button {
-        width: 38px;
-        min-width: 38px;
-        height: 38px;
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
     }
 
     .time-label {
@@ -1720,6 +1378,9 @@ video {
         max-width: 88px;
     }
 }
+
+
+
 
 </style>
 
@@ -1735,21 +1396,33 @@ video {
 
 <div class="top">
 
-    <button
-        id="vnFootballTab"
-        class="tab active"
-        onclick="switchMode('vnfootball')"
-    >
-        🇻🇳 BÓNG ĐÁ VN
-    </button>
+    <div class="brand">
 
-    <button
-        id="tvTab"
-        class="tab"
-        onclick="switchMode('tv')"
-    >
-        📺 TV
-    </button>
+        <div class="brand-mark">📡</div>
+
+        <div class="brand-name">TV<span>360</span></div>
+
+    </div>
+
+    <div class="tabs">
+
+        <button
+            id="vnFootballTab"
+            class="tab active"
+            onclick="switchMode('vnfootball')"
+        >
+            🇻🇳 Bóng đá VN
+        </button>
+
+        <button
+            id="tvTab"
+            class="tab"
+            onclick="switchMode('tv')"
+        >
+            📺 TV
+        </button>
+
+    </div>
 
 </div>
 
@@ -1799,15 +1472,18 @@ video {
 
     <!-- RIGHT -->
 
-    <div class="right">
+        <div class="right">
 
-        <div class="player-box">
+        <div class="player-box" id="playerBox">
 
-            <video
-                id="video"
-                autoplay
-                playsinline
-            ></video>
+            <div class="video-wrapper">
+                <video
+                    id="video"
+                    autoplay
+                    playsinline
+                    webkit-playsinline
+                ></video>
+            </div>
 
             <div class="player-actions">
 
@@ -1996,12 +1672,16 @@ video {
 
 </div>
 
+<!-- Chat chung da bo theo yeu cau -->
+
 
 <script>
 
 let mode = "vnfootball";
 
 let allData = [];
+
+let tvData = [];
 
 let currentSource = "Tất cả";
 
@@ -2694,22 +2374,31 @@ document.addEventListener(
 fullscreenButton.onclick =
     async () => {
         try {
-            if (document.fullscreenElement) {
-                await document.exitFullscreen?.();
+            // 1. Thoát fullscreen nếu đang mở
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) await document.exitFullscreen();
+                else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
                 return;
             }
 
-            const box =
-                document.querySelector(".player-box");
-
-            if (box && box.requestFullscreen) {
-                await box.requestFullscreen();
-                return;
+            // 2. Thử mở fullscreen cho cả cụm player-box (để hiện controls tùy biến)
+            const box = document.getElementById("playerBox");
+            if (box) {
+                if (box.requestFullscreen) {
+                    await box.requestFullscreen();
+                    return;
+                } else if (box.webkitRequestFullscreen) {
+                    await box.webkitRequestFullscreen();
+                    return;
+                }
             }
 
-            // Safari tren iOS khong fullscreen duoc the div:
-            // phai dung fullscreen cua chinh the <video>.
-            video.webkitEnterFullscreen?.();
+            // 3. Fallback cho iOS Safari (chỉ hỗ trợ fullscreen trên chính thẻ video)
+            if (video.webkitEnterFullscreen) {
+                video.webkitEnterFullscreen();
+            } else if (video.requestFullscreen) {
+                await video.requestFullscreen();
+            }
         } catch (e) {
             console.warn("Fullscreen error:", e);
         }
@@ -3076,13 +2765,15 @@ async function switchMode(
         );
 
 
-    await stopPlayer();
-
-
     hideBlv();
 
 
-    await loadData();
+    // CHỈ load playlist tương ứng — không phải cả 2
+    if (mode === "tv") {
+        await loadTvData();
+    } else if (mode === "vnfootball") {
+        await loadFootballData();
+    }
 
 
     if (
@@ -3106,6 +2797,73 @@ async function switchMode(
 // =====================================================
 // Khi playlist da tai xong, lay ten host cua cac kenh dau danh sach va
 // bat trinh duyet mo san DNS+TLS toi CDN (nhu VLC khong phai cho DNS).
+
+// =====================================================
+// LOAD TV DATA (vmt47) — có filter BLV
+// =====================================================
+async function loadTvData(force = false) {
+    const cacheKey = "tv";
+    const cached = playlistCache.get(cacheKey);
+
+    if (!force && cached && Date.now() - cached.time < PLAYLIST_CACHE_TIME) {
+        applyTvData(cached.data);
+        return;
+    }
+
+    list.innerHTML = skeletonCards(8);
+    groups.innerHTML = "";
+
+    try {
+        let data = null;
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                const response = await fetch("/api/channels?type=tv");
+
+                if (!response.ok) {
+                    throw new Error("HTTP " + response.status);
+                }
+
+                const json = await response.json();
+
+                if (!json.ok) {
+                    throw new Error(json.error || "Không tải được playlist");
+                }
+
+                data = json;
+                lastError = null;
+                break;
+            } catch (e) {
+                lastError = e;
+
+                if (attempt < 3) {
+                    list.innerHTML = `<div class="empty">Đang thử lại (${attempt}/3)...</div>`;
+                    await new Promise(r => setTimeout(r, 1200 * attempt));
+                }
+            }
+        }
+
+        if (lastError || !data) {
+            if (cached) {
+                applyTvData(cached.data);
+                return;
+            }
+            throw lastError || new Error("Không tải được playlist");
+        }
+
+        playlistCache.set(cacheKey, { time: Date.now(), data });
+        applyTvData(data);
+    } catch (err) {
+        console.error(err);
+        list.innerHTML = `
+            <div class="empty" style="color:#f44">
+                Lỗi tải playlist<br><br>${escapeHtml(err.message)}
+            </div>`;
+    }
+}
+
+
 // Khi nguoi dung bam kenh, ket noi da san sang -> bat dau phat nhanh hon
 // 100-500ms tren mobile (quan trong voi list ttthethao5).
 function warmUpStreamHosts(items) {
@@ -3342,45 +3100,139 @@ async function loadData(force = false) {
             }
 
             // Ap dung du lieu da tai (tu fetch hoac tu cache client) vao UI.
-            function applyData(data) {
+            function applyTvData(data) {
+                var arr = (data && data.channels) ? data.channels : [];
+                // Filter CHI ap dung cho danh sach TV (vmt47):
+                // bo nhom BLV Ga Vang, CoLa TV...
+                // (danh sach bong da ttthethao6 khong di qua ham nay).
+                tvData = arr.filter(function(channel) {
+                    var g = ((channel && channel.group) || "").toLowerCase();
+                    return !(g.indexOf("gavang") !== -1 ||
+                             g.indexOf("colatv") !== -1 ||
+                             g.indexOf("colatvm") !== -1 ||
+                             g.indexOf("khandai") !== -1 ||
+                             g.indexOf("baucua") !== -1);
+                });
+                renderTV();
+                warmUpStreamHosts(tvData);
+            }
 
-                if (mode === "vnfootball") {
+            function applyFootballData(data) {
+                vnSites = (data && data.sites) ? data.sites.slice() : [];
+                renderVnFootball();
+                warmUpStreamHosts(vnSites);
+            }
 
-                    vnSites =
-                        data.sites ||
-                        [];
+            // =====================================================
+            // FOOTBALL DATA LOAD (ttthethao5) — KHÔNG filter BLV
+            // =====================================================
 
-                    footballFilters.style.display =
-                        "none";
+            async function loadFootballData(force = false) {
 
-                    renderVnFootball();
+                const cacheKey = "vnfootball";
+                const cached = playlistCache.get(cacheKey);
 
-                } else {
-
-                    allData =
-                        data.channels ||
-                        [];
-
-                    footballFilters.style.display =
-                        "none";
-
-                    renderTV();
+                if (
+                    !force &&
+                    cached &&
+                    Date.now() - cached.time < PLAYLIST_CACHE_TIME
+                ) {
+                    applyFootballData(cached.data);
+                    return;
                 }
 
-                // Mo san ket noi DNS+TLS toi CDN cua cac kenh dau danh sach
-                // de khi bam kenh thi phat lien tuc (VLC-style, khong cho DNS).
-                warmUpStreamHosts(
-                    mode === "vnfootball"
-                        ? (data.sites || [])
-                        : (data.channels || [])
-                );
+                list.innerHTML =
+                    skeletonCards(8);
+
+                groups.innerHTML =
+                    "";
+
+                try {
+
+                    let data = null;
+                    let lastError = null;
+
+                    for (let attempt = 1; attempt <= 3; attempt++) {
+                        try {
+                            const response =
+                                await fetch(
+                                    "/api/channels?type=vnfootball"
+                                );
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    "HTTP " + response.status
+                                );
+                            }
+
+                            const json = await response.json();
+
+                            if (!json.ok) {
+                                throw new Error(
+                                    json.error ||
+                                    "Không tải được playlist"
+                                );
+                            }
+
+                            data = json;
+                            lastError = null;
+                            break;
+
+                        } catch (e) {
+                            lastError = e;
+
+                            if (attempt < 3) {
+                                list.innerHTML =
+                                    `<div class="empty">Đang thử lại (${attempt}/3)...</div>`;
+
+                                await new Promise(r =>
+                                    setTimeout(r, 1200 * attempt)
+                                );
+                            }
+                        }
+                    }
+
+                    if (lastError || !data) {
+                        if (cached) {
+                            applyFootballData(cached.data);
+                            return;
+                        }
+
+                        throw lastError || new Error("Không tải được playlist");
+                    }
+
+                    playlistCache.set(cacheKey, {
+                        time: Date.now(),
+                        data
+                    });
+
+                    applyFootballData(data);
+
+                } catch (err) {
+
+                    console.error(err);
+
+                    list.innerHTML =
+                        `\
+                        <div
+                            class="empty"
+                            style="color:#f44"
+                        >
+                            Lỗi tải playlist
+                            <br><br>
+                            ${escapeHtml(
+                                err.message
+                            )}
+                        </div>
+                        `;
+                }
             }
 
             // =====================================================
             // FOOTBALL
             // =====================================================
 
-            function renderFootball() {
+    function renderFootball() {
 
     footballFilters.style.display =
         "flex";
@@ -3390,7 +3242,7 @@ async function loadData(force = false) {
     // ==================================================
 
     const filtered =
-        allData.filter(
+        vnSites.filter(
             match => {
 
                 const name =
@@ -3788,7 +3640,7 @@ function renderFootballGroups() {
 
     for (
         const match
-        of allData
+        of vnSites
     ) {
 
         for (
@@ -5373,7 +5225,7 @@ async function playMpegTs(url) {
     }
 
     mpegtsRecoverCount = 0;
-        
+
     playMpegTsOnce(url);
 }
 
@@ -5934,7 +5786,7 @@ function renderTV() {
         "none";
 
     const filtered =
-        allData.slice();
+        tvData.slice();
 
     renderTVGroups(
         filtered
@@ -5994,7 +5846,7 @@ function renderTVGroups(
             () => {
 
                 const tvFiltered =
-                    allData.filter(
+                    tvData.filter(
                         x =>
                             x.group === g
                     );
@@ -6618,6 +6470,145 @@ function escapeHtml(
 
 
 // =====================================================
+// CHAT CHUNG (poll nhe qua server, luu RAM)
+// =====================================================
+
+const chatPanel = document.getElementById("chatPanel");
+const chatMessages = document.getElementById("chatMessages");
+const chatInput = document.getElementById("chatInput");
+const chatNameInput = document.getElementById("chatNameInput");
+
+let chatLastId = 0;
+let chatPollTimer = null;
+
+let chatName =
+    localStorage.getItem("tv360chatname") ||
+    ("Khách " + Math.floor(Math.random() * 900 + 100));
+
+chatNameInput.value = chatName;
+
+chatNameInput.addEventListener(
+    "change",
+    () => {
+
+        chatName =
+            chatNameInput.value.trim() ||
+            ("Khách " + Math.floor(Math.random() * 900 + 100));
+
+        chatNameInput.value = chatName;
+
+        localStorage.setItem("tv360chatname", chatName);
+    }
+);
+
+function chatSetOpen(open) {
+
+    const willOpen =
+        typeof open === "boolean"
+            ? open
+            : !chatPanel.classList.contains("open");
+
+    chatPanel.classList.toggle(
+        "open",
+        willOpen
+    );
+
+    document.getElementById("chatToggle").textContent =
+        willOpen ? "✕" : "💬";
+
+    if (willOpen) {
+        pollChat();
+        setTimeout(() => chatInput.focus(), 80);
+    }
+}
+
+document.getElementById("chatToggle").onclick =
+    () => chatSetOpen();
+
+function chatAppend(m) {
+
+    const empty = chatMessages.querySelector(".chat-empty");
+
+    if (empty) {
+        empty.remove();
+    }
+
+    const div = document.createElement("div");
+
+    div.className =
+        "chat-msg" + (m.name === chatName ? " self" : "");
+
+    div.innerHTML =
+        "<b>" + escapeHtml(m.name) + "</b>" +
+        escapeHtml(m.text);
+
+    chatMessages.appendChild(div);
+
+    // Gioi han DOM: giu 150 tin cuoi
+    while (chatMessages.children.length > 150) {
+        chatMessages.removeChild(chatMessages.firstChild);
+    }
+}
+
+async function pollChat() {
+
+    try {
+
+        const r =
+            await fetch("/api/chat?after=" + chatLastId);
+
+        const j =
+            await r.json();
+
+        if (!j || !j.ok || !j.messages.length) {
+            return;
+        }
+
+        const atBottom =
+            chatMessages.scrollTop + chatMessages.clientHeight >=
+            chatMessages.scrollHeight - 40;
+
+        for (const m of j.messages) {
+            chatLastId = Math.max(chatLastId, m.id);
+            chatAppend(m);
+        }
+
+        if (atBottom) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+    } catch {}
+}
+
+document.getElementById("chatForm").addEventListener(
+    "submit",
+    async e => {
+
+        e.preventDefault();
+
+        const text = chatInput.value.trim();
+
+        if (!text) return;
+
+        chatInput.value = "";
+
+        try {
+
+            await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: chatName, text })
+            });
+
+            pollChat();
+
+        } catch {}
+    }
+);
+
+setInterval(pollChat, 5000);
+
+// =====================================================
 // START
 // =====================================================
 
@@ -6636,7 +6627,15 @@ function escapeHtml(
     }
 
 
-    await loadData();
+        
+    
+
+    // Chọn hàm tải đúng theo mode — không dùng loadData() chung nữa
+    if (mode === "tv") {
+        await loadTvData();
+    } else if (mode === "vnfootball") {
+        await loadFootballData();
+    }
 
 
     // Dong bo trang thai thanh cong cu ngay khi mo trang (nut play/mute,

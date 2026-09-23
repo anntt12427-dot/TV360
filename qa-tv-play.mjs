@@ -13,7 +13,7 @@ export default async function run(page, ui) {
       return l && l.querySelector('.channel');
     },
     { timeout: 40000 }
-  ).catch(() => {});
+  ).catch(() => { });
 
   // Lấy danh sách kênh, bấm lần lượt từng kênh, đo thời gian và kết quả
   const results = [];
@@ -37,7 +37,7 @@ export default async function run(page, ui) {
         return s.includes('Đang phát') || (e && e.length > 0);
       },
       { timeout: 15000 }
-    ).catch(() => {});
+    ).catch(() => { });
     await page.waitForTimeout(6000);
 
     const st = await page.evaluate(() => ({
